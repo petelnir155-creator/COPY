@@ -27,7 +27,7 @@ export default function Basketball({ onMore, onHire }: GameProps) {
   useEffect(() => {
     if (phase !== "thrown") return;
     const done = window.setTimeout(() => setPhase("done"), (TOTAL + 0.5) * 1000);
-    const tick = window.setInterval(() => setClock((c) => Math.max(0, c - 1)), 130);
+    const tick = window.setInterval(() => setClock((c) => Math.max(0, c - 1)), 1000);
     return () => {
       window.clearTimeout(done);
       window.clearInterval(tick);

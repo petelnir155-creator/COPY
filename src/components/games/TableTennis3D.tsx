@@ -14,13 +14,17 @@ export default function TableTennis3D({ onMore, onHire, onFail }: GameProps & { 
   const [phase, setPhase] = useState<Phase>("ready");
   const [broken, setBroken] = useState(false);
   const [ump, setUmp] = useState({ x: 82, y: 36 });
+  const [pl, setPl] = useState({ x: 22, y: 60 });
   const startY = useRef<number | null>(null);
 
   useEffect(() => {
     if (!host.current) return;
     let c: ReturnType<typeof createTennis3D> | null = null;
     try {
-      c = createTennis3D(host.current, { onFail, onReady: (i) => setUmp(i.ump) });
+      c = createTennis3D(host.current, { onFail, onReady: (i) => {
+          setUmp(i.ump);
+          setPl(i.player);
+        } });
       ctrl.current = c;
     } catch {
       onFail();
@@ -73,7 +77,7 @@ export default function TableTennis3D({ onMore, onHire, onFail }: GameProps & { 
           <>
             <motion.div
               className="absolute z-20 font-fun text-3xl font-normal text-paper drop-shadow-[0_2px_0_rgba(0,0,0,.55)]"
-              style={{ left: "24%", top: "40%" }}
+              style={{ left: `${pl.x + 8}%`, top: `${pl.y - 24}%` }}
               initial={{ scale: 0, rotate: -10, opacity: 0 }}
               animate={{ scale: 1, rotate: -6, opacity: 1 }}
               transition={{ type: "spring", stiffness: 500, damping: 18 }}
@@ -107,7 +111,7 @@ export default function TableTennis3D({ onMore, onHire, onFail }: GameProps & { 
         {!thrown && (
           <motion.div
             className="pointer-events-none absolute z-10 text-3xl font-black leading-none text-paper drop-shadow-[0_2px_0_rgba(0,0,0,.6)]"
-            style={{ left: "20%", top: "46%", x: "-50%" }}
+            style={{ left: `${pl.x}%`, top: `${Math.max(pl.y - 32, 8)}%`, x: "-50%" }}
             animate={{ y: [0, -10, 0], opacity: [1, 0.4, 1] }}
             transition={{ duration: 1.2, repeat: Infinity }}
             aria-hidden

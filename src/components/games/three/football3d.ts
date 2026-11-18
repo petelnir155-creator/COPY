@@ -332,7 +332,7 @@ export function createFootball3D(
   }
 
   // שלטי אוהדים: אדום-לבן, מורמים באוויר
-  const signTex = (lines: string[], bg: string, fg: string, w = 640, h = 320) => {
+  const signTex = (lines: string[], bg: string, fg: string, w: number, h: number, size: number) => {
     const c = canvas(w, h);
     const g = c.getContext("2d");
     const draw = () => {
@@ -344,10 +344,9 @@ export function createFootball3D(
       g.fillStyle = fg;
       g.textAlign = "center";
       g.textBaseline = "middle";
-      const size = lines.length > 1 ? 50 : 118;
       g.font = `900 ${size}px Heebo, Arial, sans-serif`;
       const lh = size * 1.22;
-      lines.forEach((l, i) => g.fillText(l, w / 2, h / 2 + (i - (lines.length - 1) / 2) * lh, w - 60));
+      lines.forEach((l, i) => g.fillText(l, w / 2, h / 2 + (i - (lines.length - 1) / 2) * lh, w - 70));
     };
     draw();
     const t = tex(c);
@@ -359,11 +358,10 @@ export function createFootball3D(
     } catch {}
     return t;
   };
-  const LONG = ["הלוואי יכולתי להעסיק אותך", "אבל אני דמות תלת ממדית", "בתיק העבודות המטופש שלך!!!"];
+  const LONG = ["הלוואי יכולתי להעסיק אותך אבל אני דמות תלת ממדית", "בתיק העבודות המטופש שלך!!!"];
   const signDefs = [
-    { x: -10.5, v: 1.3, w: 9, h: 4.5, lines: LONG, bg: "#c8141f", fg: "#ffffff" },
-    { x: 10.5, v: 1.3, w: 9, h: 4.5, lines: LONG, bg: "#ffffff", fg: "#c8141f" },
-    { x: 0, v: 1.9, w: 6.4, h: 2.6, lines: ["פטל יא מלך"], bg: "#ffffff", fg: "#c8141f" },
+    { x: 0, v: 0.5, w: 31, h: 4.6, lines: LONG, bg: "#c8141f", fg: "#ffffff", cw: 2048, size: 86 },
+    { x: 0, v: 3.7, w: 6, h: 2.2, lines: ["פטל יא מלך"], bg: "#ffffff", fg: "#c8141f", cw: 1024, size: 190 },
   ];
   const signGroups: any[] = [];
   for (const d of signDefs) {
@@ -371,10 +369,11 @@ export function createFootball3D(
     const bp = standPt(d.x, d.v);
     grp.position.set(bp.x, bp.y, bp.z + 0.5);
     grp.rotation.x = -0.62;
-    const sg = new THREE.Mesh(new THREE.PlaneGeometry(d.w, d.h), new THREE.MeshBasicMaterial({ map: signTex(d.lines, d.bg, d.fg, 640, Math.round(640 * d.h / d.w)), side: THREE.DoubleSide, color: 0xe2e2e2 }));
+    const sg = new THREE.Mesh(new THREE.PlaneGeometry(d.w, d.h), new THREE.MeshBasicMaterial({ map: signTex(d.lines, d.bg, d.fg, d.cw, Math.round(d.cw * d.h / d.w), d.size), side: THREE.DoubleSide, color: 0xe2e2e2 }));
     grp.add(sg);
     // מוטות וידיים
-    for (const sx of [-1, 1]) {
+    const polesX = d.w > 12 ? [-1, -0.5, 0, 0.5, 1] : [-1, 1];
+    for (const sx of polesX) {
       const p = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, d.h + 1.6, 6), new THREE.MeshBasicMaterial({ color: 0x15161b }));
       p.position.set(sx * (d.w / 2 - 0.2), -0.7, 0);
       grp.add(p);

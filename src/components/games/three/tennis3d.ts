@@ -91,7 +91,7 @@ function woodTexture() {
   return t;
 }
 
-export function createTennis3D(host: HTMLElement, cb: { onFail: (e?: unknown) => void; onReady: (info: { ump: { x: number; y: number } }) => void }) {
+export function createTennis3D(host: HTMLElement, cb: { onFail: (e?: unknown) => void; onReady: (info: { ump: { x: number; y: number }; player: { x: number; y: number } }) => void }) {
   const sky = (() => {
     const c = canvas(8, 256);
     const g = c.getContext("2d");
@@ -103,7 +103,7 @@ export function createTennis3D(host: HTMLElement, cb: { onFail: (e?: unknown) =>
     g.fillRect(0, 0, 8, 256);
     return tex(c);
   })();
-  const stage = createStage(host, cb, { fov: 40, cam: [0.9, 2.5, 14.6], look: [0, 1.2, -2.5], bg: sky, fog: [0xc9d9e2, 0.0105], exposure: 1.0 });
+  const stage = createStage(host, cb, { fov: 40, cam: [0.9, 2.4, 15.6], look: [0, 1.25, -1.5], bg: sky, fog: [0xc9d9e2, 0.0105], exposure: 1.0 });
   const { scene, camera, mobile } = stage;
   const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 
@@ -234,7 +234,7 @@ export function createTennis3D(host: HTMLElement, cb: { onFail: (e?: unknown) =>
 
   // ----- שחקן -----
   const player = makePlayer({ jersey: "#F4EFE6", shorts: "#F4EFE6", sock: "#F4EFE6", hair: "#1a1411", skin: "#E6C3A3" });
-  const P0 = V(-3.0, 0, 10.6);
+  const P0 = V(-1.3, 0, 8.8);
   player.root.position.copy(P0);
   scene.add(player.root);
   // מחבט בידית שמאל
@@ -334,7 +334,7 @@ export function createTennis3D(host: HTMLElement, cb: { onFail: (e?: unknown) =>
   let lastFlash = 0;
 
   const umpScreen = stage.project(7.55, 3.2, 0);
-  cb.onReady({ ump: umpScreen });
+  cb.onReady({ ump: umpScreen, player: stage.project(P0.x, 1.0, P0.z) });
 
   stage.start((now) => {
     const kt = serving ? now - t0 : -1;

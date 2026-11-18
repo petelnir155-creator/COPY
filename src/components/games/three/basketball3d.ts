@@ -108,12 +108,12 @@ function nunTexture() {
 }
 
 export function createBasketball3D(host: HTMLElement, cb: { onFail: (e?: unknown) => void; onReady: () => void }) {
-  const stage = createStage(host, cb, { fov: 38, cam: [4.4, 2.1, 8.8], look: [-0.4, 2.3, 2.0], bg: "#05060a", fog: [0x080a10, 0.018], exposure: 1.1 });
+  const stage = createStage(host, cb, { fov: 38, cam: [5.0, 2.25, 10.0], look: [-0.5, 2.3, 1.8], bg: "#07080d", fog: [0x0a0c13, 0.013], exposure: 1.28 });
   const { scene, camera, mobile } = stage;
   const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 
   // ----- אורות -----
-  scene.add(new THREE.HemisphereLight(0xc7d6ff, 0x2a1c12, 0.8));
+  scene.add(new THREE.HemisphereLight(0xc7d6ff, 0x3a2a1c, 1.15));
   keyLight(stage, 0xfff0d8, 2.8, [5, 14, 9], [0, 0, 3], 11);
   const rimLight = new THREE.DirectionalLight(0xff8a50, 1.0);
   rimLight.position.set(-4, 5, -8);
@@ -138,9 +138,9 @@ export function createBasketball3D(host: HTMLElement, cb: { onFail: (e?: unknown
   const orange = ["#F4EFE6", "#FF4A1C", "#2a2d35", "#c9c2b3", "#a8421f", "#1e2128", "#F4EFE6", "#8e9a93"];
   const crowdGroup = new THREE.Group();
   const mkStand = (w: number, h: number, seed: number) => {
-    const m = new THREE.MeshBasicMaterial({ map: crowdTexture(seed, orange), color: 0xa8aab4 });
+    const m = new THREE.MeshBasicMaterial({ map: crowdTexture(seed, orange), color: 0xd2d4de });
     m.map.wrapS = m.map.wrapT = THREE.RepeatWrapping;
-    m.map.repeat.set(w / 18, h / 8);
+    m.map.repeat.set(w / 9, h / 4);
     return new THREE.Mesh(new THREE.PlaneGeometry(w, h), m);
   };
   const back = mkStand(60, 22, 21);
@@ -153,13 +153,19 @@ export function createBasketball3D(host: HTMLElement, cb: { onFail: (e?: unknown
   side.rotateX(-0.5);
   crowdGroup.add(side);
   scene.add(crowdGroup);
-  const wallB = new THREE.Mesh(new THREE.PlaneGeometry(60, 3.4), new THREE.MeshBasicMaterial({ color: 0x0b0c10 }));
+  const wallB = new THREE.Mesh(new THREE.PlaneGeometry(60, 3.4), new THREE.MeshBasicMaterial({ color: 0x1c1f29 }));
   wallB.position.set(0, 1.7, -7.4);
   scene.add(wallB);
-  const wallS = new THREE.Mesh(new THREE.PlaneGeometry(44, 3.4), new THREE.MeshBasicMaterial({ color: 0x0b0c10 }));
+  const wallS = new THREE.Mesh(new THREE.PlaneGeometry(44, 3.4), new THREE.MeshBasicMaterial({ color: 0x1c1f29 }));
   wallS.position.set(-8.4, 1.7, 5);
   wallS.rotation.y = Math.PI / 2;
   scene.add(wallS);
+  for (const [w, x, z, ry] of [[60, 0, -7.35, 0], [44, -8.35, 5, Math.PI / 2]]) {
+    const strip = new THREE.Mesh(new THREE.PlaneGeometry(w, 0.1), new THREE.MeshBasicMaterial({ color: 0xff6a3d, toneMapped: false }));
+    strip.position.set(x, 3.3, z);
+    strip.rotation.y = ry;
+    scene.add(strip);
+  }
   // שלטי LED
   const ledTex = (() => {
     const c = canvas(1024, 64);

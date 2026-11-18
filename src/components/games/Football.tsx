@@ -18,6 +18,13 @@ const corners: Corner[] = [
 const START = { x: 50, y: 78 }; // נקודת הפנדל
 const GROUND_Y = 70; // איפה הכדור נוחת (מרוסק)
 
+// קהל ביציע: נקודות בלי צהוב (נייר, אדום-כתום, מנטה)
+const crowd = Array.from({ length: 34 }, (_, i) => ({
+  cx: 8 + i * 12 + (i % 3),
+  cy: 10 + (i % 4) * 9,
+  fill: ["#F4EFE6", "#FF4A1C", "#D5E5DA"][i % 3],
+}));
+
 function SoccerBall() {
   return (
     <svg viewBox="0 0 40 40" className="block h-full w-full" aria-hidden>
@@ -53,6 +60,11 @@ function Striker({ kick }: { kick: boolean }) {
       <g stroke="#111" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" fill="none">
         <path d="M42 112 L40 148" />
         {kick ? <path d="M58 112 L78 128 L96 116" /> : <path d="M58 112 L60 148" />}
+      </g>
+      {/* גרביים */}
+      <g stroke="#FF4A1C" strokeWidth="9" strokeLinecap="round" fill="none">
+        <path d="M40.5 134 L40 146" />
+        {!kick && <path d="M59.5 134 L60 146" />}
       </g>
       <ellipse cx="38" cy="152" rx="10" ry="5" fill="#111" />
       {kick ? (
@@ -95,7 +107,11 @@ function Keeper() {
         <path d="M34 52 L36 76" />
       </g>
       <rect x="20" y="22" width="20" height="32" rx="3" fill="#111" />
+      <rect x="20" y="36" width="20" height="5" fill="#D5E5DA" />
       <circle cx="30" cy="13" r="9" fill="#F4EFE6" stroke="#111" strokeWidth="3" />
+      {/* כפפות */}
+      <circle cx="6" cy="10" r="4.5" fill="#FF4A1C" stroke="#111" strokeWidth="1.5" />
+      <circle cx="54" cy="10" r="4.5" fill="#FF4A1C" stroke="#111" strokeWidth="1.5" />
     </svg>
   );
 }
@@ -128,13 +144,26 @@ export default function Football({ onMore, onHire }: GameProps) {
   return (
     <div>
       <div className="relative mx-auto aspect-[4/3] w-full max-w-xl select-none overflow-hidden border-2 border-ink bg-paper-2">
-        {/* מגרש ושער */}
+        {/* יציע, דשא עם פסי כיסוח, קווי רחבה ושער עם רשת */}
         <svg viewBox="0 0 400 300" className="absolute inset-0 h-full w-full" aria-hidden>
-          <rect x="0" y="135" width="400" height="165" fill="#F4EFE6" />
-          <line x1="0" y1="135" x2="400" y2="135" stroke="#111" strokeWidth="3" />
-          <rect x="60" y="135" width="280" height="115" fill="none" stroke="#111" strokeOpacity="0.4" strokeWidth="2" />
-          <circle cx="200" cy="234" r="3.5" fill="#111" />
-          <g stroke="#111" strokeOpacity="0.18" strokeWidth="1">
+          <rect x="0" y="0" width="400" height="38" fill="#111" />
+          {crowd.map((d, i) => (
+            <circle key={i} cx={d.cx} cy={d.cy} r="3.2" fill={d.fill} />
+          ))}
+          <rect x="0" y="38" width="400" height="97" fill="#E9E2D3" />
+          {Array.from({ length: 8 }, (_, i) => (
+            <rect key={i} x={i * 50} y="135" width="50" height="165" fill={i % 2 ? "#CFE3D4" : "#C3DBC9"} />
+          ))}
+          <line x1="0" y1="135" x2="400" y2="135" stroke="#F4EFE6" strokeWidth="4" />
+          <g fill="none" stroke="#F4EFE6" strokeWidth="3">
+            <rect x="60" y="135" width="280" height="115" />
+            <path d="M142 250 A60 60 0 0 0 258 250" />
+          </g>
+          <circle cx="200" cy="234" r="3.5" fill="#F4EFE6" />
+          <ellipse cx="200" cy="245" rx="15" ry="4" fill="#111" fillOpacity="0.16" />
+          {/* רשת השער */}
+          <rect x="50" y="40" width="300" height="95" fill="#F4EFE6" fillOpacity="0.35" />
+          <g stroke="#111" strokeOpacity="0.22" strokeWidth="1">
             {Array.from({ length: 13 }, (_, i) => (
               <line key={`v${i}`} x1={50 + i * 25} y1="40" x2={50 + i * 25} y2="135" />
             ))}
@@ -167,7 +196,7 @@ export default function Football({ onMore, onHire }: GameProps) {
           </motion.div>
         </div>
 
-        {/* נקודות הפינה */}
+        {/* נקודות הפינה: מטרה עם פלוס */}
         {phase === "pick" &&
           corners.map((c) => (
             <button
@@ -175,9 +204,11 @@ export default function Football({ onMore, onHire }: GameProps) {
               type="button"
               aria-label={`בעיטה ל${c.label}`}
               onClick={() => pick(c)}
-              className="absolute z-10 h-12 w-12 -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full border-2 border-accent bg-accent/15 transition active:scale-90"
+              className="absolute z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 animate-pulse items-center justify-center rounded-full border-2 border-accent bg-paper/60 text-xl font-bold leading-none text-accent transition hover:scale-110 active:scale-90"
               style={{ left: `${c.x}%`, top: `${c.y}%` }}
-            />
+            >
+              +
+            </button>
           ))}
 
         {/* השחקן */}
@@ -219,17 +250,26 @@ export default function Football({ onMore, onHire }: GameProps) {
           </motion.div>
         </motion.div>
 
-        {/* פססססס */}
+        {/* אבק בנחיתה ופססססס */}
         {kicking && (
-          <motion.span
-            className="absolute z-10 font-fun text-lg font-normal text-accent"
-            style={{ left: `${midX}%`, top: `${midY - 9}%` }}
-            initial={{ opacity: 0, y: 0 }}
-            animate={{ opacity: [0, 1, 0], y: -26 }}
-            transition={{ delay: 0.75, duration: 1.3 }}
-          >
-            פססססס…
-          </motion.span>
+          <>
+            <motion.span
+              className="absolute h-5 w-12 rounded-full bg-ink/20"
+              style={{ left: `${midX}%`, top: `${GROUND_Y + 3}%`, x: "-50%", y: "-50%" }}
+              initial={{ opacity: 0, scale: 0.3 }}
+              animate={{ opacity: [0, 0.7, 0], scale: [0.3, 1.5, 2] }}
+              transition={{ delay: 1.3, duration: 0.8 }}
+            />
+            <motion.span
+              className="absolute z-10 font-fun text-lg font-normal text-accent"
+              style={{ left: `${midX}%`, top: `${midY - 9}%` }}
+              initial={{ opacity: 0, y: 0 }}
+              animate={{ opacity: [0, 1, 0], y: -26 }}
+              transition={{ delay: 0.75, duration: 1.3 }}
+            >
+              פססססס…
+            </motion.span>
+          </>
         )}
       </div>
 
@@ -239,7 +279,7 @@ export default function Football({ onMore, onHire }: GameProps) {
 
       {phase === "done" && (
         <GameOverModal
-          message="אוי איזה פאדיחה, הכדור התפנצ'ר. מה תעשו עכשיו?"
+          message="אוי איזה פאדיחה הכדור התפנצ'ר. טוב, עכשיו?"
           onMore={onMore}
           onHire={onHire}
         />

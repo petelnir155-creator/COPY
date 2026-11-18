@@ -6,11 +6,19 @@ import type { GameProps } from "./GameOverModal";
 
 // הבמה 4:3, ה-SVG 400x300 ממופה עליה 1:1.
 // הכדור (16% מהרוחב = 64 יחידות) גדול מפתח החישוק (56 יחידות), לכן הוא נתקע.
+// אם משנים את הגיאומטריה של החישוק, צריך לעדכן גם את RIM.
 
 type Phase = "ready" | "thrown" | "done";
 
 const HOLD = { x: 29.4, y: 68 }; // איפה הכדור ביד
 const RIM = { x: 81, y: 29.3 }; // איפה הוא נתקע
+
+// קהל ביציע, בלי צהוב
+const crowd = Array.from({ length: 34 }, (_, i) => ({
+  cx: 8 + i * 12 + (i % 3),
+  cy: 10 + (i % 4) * 9,
+  fill: ["#F4EFE6", "#FF4A1C", "#D5E5DA"][i % 3],
+}));
 
 function BasketBall() {
   return (
@@ -46,8 +54,13 @@ function Hooper({ throwing }: { throwing: boolean }) {
         <path d="M42 112 L40 148" />
         <path d="M58 112 L60 148" />
       </g>
-      <ellipse cx="38" cy="152" rx="10" ry="5" fill="#111" />
-      <ellipse cx="62" cy="152" rx="10" ry="5" fill="#111" />
+      {/* גרביים ונעליים */}
+      <g stroke="#F4EFE6" strokeWidth="9" strokeLinecap="round" fill="none">
+        <path d="M40.5 134 L40 146" />
+        <path d="M59.5 134 L60 146" />
+      </g>
+      <ellipse cx="38" cy="152" rx="11" ry="5.5" fill="#FF4A1C" stroke="#111" strokeWidth="2.5" />
+      <ellipse cx="62" cy="152" rx="11" ry="5.5" fill="#FF4A1C" stroke="#111" strokeWidth="2.5" />
       <rect x="34" y="92" width="32" height="24" rx="3" fill="#111" />
       <path
         d="M32 38 Q50 32 68 38 L66 94 L34 94 Z"
@@ -56,9 +69,10 @@ function Hooper({ throwing }: { throwing: boolean }) {
         strokeWidth="3.5"
         strokeLinejoin="round"
       />
+      <path d="M32 38 Q50 32 68 38" stroke="#FF4A1C" strokeWidth="4" fill="none" strokeLinecap="round" />
       <text
         x="50"
-        y="76"
+        y="78"
         textAnchor="middle"
         fontSize="26"
         fontWeight="900"
@@ -69,6 +83,8 @@ function Hooper({ throwing }: { throwing: boolean }) {
       </text>
       <circle cx="50" cy="20" r="13" fill="#F4EFE6" stroke="#111" strokeWidth="3.5" />
       <path d="M38 16 Q50 3 62 16" stroke="#111" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+      {/* סרט ראש */}
+      <path d="M38 14 H62" stroke="#FF4A1C" strokeWidth="4" strokeLinecap="round" />
     </svg>
   );
 }
@@ -100,23 +116,39 @@ export default function Basketball({ onMore, onHire }: GameProps) {
   return (
     <div>
       <div className="relative mx-auto aspect-[4/3] w-full max-w-xl select-none overflow-hidden border-2 border-ink bg-paper-2">
-        {/* רצפה, עמוד, לוח, חישוק ורשת */}
+        {/* אולם: יציע, פרקט עם צבע בצבע, לוח, חישוק ורשת */}
         <svg viewBox="0 0 400 300" className="absolute inset-0 h-full w-full" aria-hidden>
-          <rect x="0" y="262" width="400" height="38" fill="#F4EFE6" />
+          <rect x="0" y="0" width="400" height="38" fill="#111" />
+          {crowd.map((d, i) => (
+            <circle key={i} cx={d.cx} cy={d.cy} r="3.2" fill={d.fill} />
+          ))}
+          {/* פרקט: לוחות ו"צבע" */}
+          <rect x="0" y="262" width="400" height="38" fill="#EBDCC8" />
+          {Array.from({ length: 9 }, (_, i) => (
+            <line key={i} x1={i * 50} y1="262" x2={i * 50 - 14} y2="300" stroke="#111" strokeOpacity="0.1" strokeWidth="1.5" />
+          ))}
+          <rect x="236" y="262" width="164" height="38" fill="#FF4A1C" fillOpacity="0.2" />
+          <line x1="236" y1="262" x2="236" y2="300" stroke="#F4EFE6" strokeWidth="4" />
+          <line x1="150" y1="262" x2="150" y2="300" stroke="#F4EFE6" strokeWidth="4" strokeDasharray="6 5" />
           <line x1="0" y1="262" x2="400" y2="262" stroke="#111" strokeWidth="3" />
+          {/* עמוד, בסיס, לוח */}
+          <rect x="344" y="262" width="26" height="6" fill="#111" />
           <line x1="356" y1="130" x2="356" y2="262" stroke="#111" strokeWidth="9" />
           <rect x="352" y="40" width="9" height="92" fill="#F4EFE6" stroke="#111" strokeWidth="3" />
-          <g stroke="#111" strokeOpacity="0.45" strokeWidth="1.5" fill="none">
+          <rect x="353.5" y="94" width="6" height="30" fill="none" stroke="#FF4A1C" strokeWidth="2" />
+          {/* רשת */}
+          <g stroke="#111" strokeOpacity="0.5" strokeWidth="1.5" fill="none">
             <polygon points="296,120 352,120 340,172 308,172" />
             <line x1="310" y1="120" x2="316" y2="172" />
             <line x1="324" y1="120" x2="324" y2="172" />
             <line x1="338" y1="120" x2="332" y2="172" />
             <line x1="302" y1="146" x2="346" y2="146" />
           </g>
+          {/* חישוק */}
           <line x1="294" y1="120" x2="353" y2="120" stroke="#111" strokeWidth="6" strokeLinecap="round" />
         </svg>
 
-        <div className="absolute end-3 top-3 z-10 border-2 border-ink bg-paper px-2.5 py-1 text-sm font-bold">
+        <div className="absolute end-3 top-12 z-10 border-2 border-ink bg-paper px-2.5 py-1 text-sm font-bold">
           בהחלקה, זרקו את הכדור
         </div>
 
@@ -143,7 +175,7 @@ export default function Basketball({ onMore, onHire }: GameProps) {
             thrown
               ? {
                   left: [`${HOLD.x}%`, "55%", `${RIM.x}%`, `${RIM.x}%`, `${RIM.x}%`, `${RIM.x}%`],
-                  top: [`${HOLD.y}%`, "12%", `${RIM.y}%`, `${RIM.y}%`, `${RIM.y - 1}%`, `${RIM.y}%`],
+                  top: [`${HOLD.y}%`, "14%", `${RIM.y}%`, `${RIM.y}%`, `${RIM.y - 1}%`, `${RIM.y}%`],
                   rotate: [0, 300, 540, 540, 552, 540],
                 }
               : { left: `${HOLD.x}%`, top: `${HOLD.y}%`, rotate: 0 }
@@ -166,7 +198,7 @@ export default function Basketball({ onMore, onHire }: GameProps) {
         {thrown && (
           <motion.div
             className="absolute z-10 font-fun text-3xl font-normal"
-            style={{ left: "56%", top: "6%" }}
+            style={{ left: "56%", top: "10%" }}
             initial={{ scale: 0, rotate: -12, opacity: 0 }}
             animate={{ scale: 1, rotate: -8, opacity: 1 }}
             transition={{ delay: 1.3, type: "spring", stiffness: 500, damping: 18 }}

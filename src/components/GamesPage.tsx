@@ -3,12 +3,14 @@ import type { ComponentType } from "react";
 import { site } from "../data/site";
 import Football from "./games/Football";
 import Basketball from "./games/Basketball";
+import TableTennis from "./games/TableTennis";
 import type { GameProps } from "./games/GameOverModal";
 
 // להוסיף משחקון: ליצור קומפוננטה ב-src/components/games/ שמקבלת { onMore, onHire }, ולהוסיף שורה כאן.
-const games: { id: string; title: string; blurb: string; Component: ComponentType<GameProps> }[] = [
-  { id: "football", title: "דו-קרב פנדלים", blurb: "בחרו פינה.", Component: Football },
-  { id: "basketball", title: "זריקת עונשין", blurb: "החליקו. זרקו. תתפללו.", Component: Basketball },
+const games: { id: string; title: string; blurb?: string; Component: ComponentType<GameProps> }[] = [
+  { id: "football", title: "דו-קרב פנדלים", blurb: "הבקעתם? קיבלתם תסריט בחצי מחיר!", Component: Football },
+  { id: "basketball", title: "זריקת עונשין", blurb: "קלעתם לסל? קיבלתם גאנט בחינם ממני!", Component: Basketball },
+  { id: "tabletennis", title: "טניס שולחן", Component: TableTennis },
 ];
 
 export default function GamesPage() {
@@ -71,7 +73,7 @@ export default function GamesPage() {
                 className="group block w-full border-2 border-ink p-5 text-start transition hover:bg-ink hover:text-paper active:scale-[0.99]"
               >
                 <span className="block font-fun text-4xl font-normal leading-none">{g.title}</span>
-                <span className="mt-3 block text-base opacity-80">{g.blurb}</span>
+                {g.blurb && <span className="mt-3 block text-base opacity-80">{g.blurb}</span>}
                 <span className="mt-5 block text-sm font-medium text-accent">שחקו ↗</span>
               </button>
             </li>

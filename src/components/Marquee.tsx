@@ -2,8 +2,11 @@ import { brands } from "../data/brands";
 
 export default function Marquee() {
   // שתי חצאים זהים, כל חצי חוזר פעמיים כדי למלא גם מסכים רחבים. האנימציה זזה 50% ללולאה חלקה.
-  const half = [...brands, ...brands];
+  // עם הרבה לוגואים אין צורך להכפיל כל חצי. משך הלולאה גדל עם הכמות, כך שהמהירות קבועה
+  // (בערך 70 פיקסל לשנייה) בין אם יש 12 לוגואים ובין אם 22.
+  const half = brands.length >= 14 ? brands : [...brands, ...brands];
   const track = [...half, ...half];
+  const duration = `${Math.round(half.length * 2.2)}s`;
 
   return (
     <section
@@ -18,7 +21,11 @@ export default function Marquee() {
         חלק מהמותגים שהסכימו לעבוד איתי
       </h2>
 
-      <div dir="ltr" className="flex w-max animate-marquee items-center hover:[animation-play-state:paused] motion-reduce:animate-none">
+      <div
+        dir="ltr"
+        className="flex w-max animate-marquee items-center hover:[animation-play-state:paused] motion-reduce:animate-none"
+        style={{ animationDuration: duration }}
+      >
         {track.map((b, i) => (
           <div
             key={i}

@@ -11,4 +11,5 @@ export const brands: Brand[] = [
   { name: "וניש" },
   { name: "מוזיאון הטבע" },
   { name: "ווינר" },
+  { name: "אייס ACE" },
 ];

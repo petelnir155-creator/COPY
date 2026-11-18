@@ -77,7 +77,6 @@ export const projects: Project[] = [
   {
     id: "mondial",
     title: "מונדיאל עשרים ו-יש!",
-    // TODO: לאשר שהמותג הוא ווינר (נגזר מהכותרת "מונדיאל ווינר")
     brand: "ווינר",
     category: "creative",
     videos: [
@@ -111,7 +110,7 @@ export const projects: Project[] = [
   {
     id: "ice-valentines",
     title: "עלה לכם מהולנטיינז?",
-    // TODO: להוסיף brand
+    brand: "אייס ACE",
     category: "creative",
     blurb: "בואו לאייס!",
     videos: [yt("Bpds-tzpAsk")],

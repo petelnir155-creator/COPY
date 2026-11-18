@@ -7,6 +7,8 @@ const ease = [0.2, 0.7, 0.2, 1] as const;
 export default function Hero() {
   const reduce = useReducedMotion();
   const [order, setOrder] = useState<number[]>(site.roles.map((_, i) => i));
+  // אם התמונה עוד לא הועלתה (או נכשלה), כל מה שקשור לדין פשוט נעלם והמבנה לא נשבר
+  const [photoOk, setPhotoOk] = useState(true);
 
   const shuffle = () => setOrder((o) => [o[o.length - 1], ...o.slice(0, -1)]);
 
@@ -41,30 +43,90 @@ export default function Hero() {
         </span>
       </h1>
 
-      <ol className="mt-8 font-serif text-3xl font-bold leading-tight sm:text-5xl">
-        {order.map((roleIdx, pos) => (
-          <motion.li
-            key={roleIdx}
-            layout={!reduce}
-            transition={{ type: "spring", stiffness: 420, damping: 36 }}
-            className="flex items-baseline gap-3"
-          >
-            <span className="w-6 font-sans text-sm font-medium tabular-nums text-accent">
-              0{pos + 1}
-            </span>
-            {site.roles[roleIdx]}
-          </motion.li>
-        ))}
-      </ol>
-
-      <button
-        type="button"
-        onClick={shuffle}
-        className="link-draw mt-4 pb-0.5 text-sm text-ink/70"
-        aria-label="ערבבו את סדר התפקידים"
+      <div
+        className={`mt-8 grid items-center gap-8 ${
+          photoOk ? "md:grid-cols-[minmax(0,1fr)_15rem]" : ""
+        }`}
       >
-        ({site.rolesNote}) ↻
-      </button>
+        <div>
+          <ol className="font-serif text-3xl font-bold leading-tight sm:text-5xl">
+            {order.map((roleIdx, pos) => (
+              <motion.li
+                key={roleIdx}
+                layout={!reduce}
+                transition={{ type: "spring", stiffness: 420, damping: 36 }}
+                className="flex items-baseline gap-3"
+              >
+                <span className="w-6 font-sans text-sm font-medium tabular-nums text-accent">
+                  0{pos + 1}
+                </span>
+                <span>{site.roles[roleIdx]}</span>
+
+                {/* החץ שייך ל"אבא של דין", אז הוא זז איתו כשהסדר מתחלף ומצויר מחדש */}
+                {roleIdx === site.deanRoleIndex && photoOk && (
+                  <svg
+                    key={pos}
+                    aria-hidden
+                    className="hidden h-8 max-w-sm flex-1 self-center text-ink md:block"
+                    viewBox="0 0 200 40"
+                    preserveAspectRatio="none"
+                    fill="none"
+                  >
+                    <motion.path
+                      d="M196 24 C 150 6, 90 40, 14 20"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      vectorEffect="non-scaling-stroke"
+                      initial={reduce ? undefined : ({ pathLength: 0 } as never)}
+                      animate={{ pathLength: 1 } as never}
+                      transition={{ duration: 0.7, delay: 0.35, ease }}
+                    />
+                    <motion.path
+                      d="M14 20 L 32 8 M14 20 L 30 34"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      vectorEffect="non-scaling-stroke"
+                      initial={reduce ? undefined : ({ pathLength: 0 } as never)}
+                      animate={{ pathLength: 1 } as never}
+                      transition={{ duration: 0.3, delay: 0.95, ease }}
+                    />
+                  </svg>
+                )}
+              </motion.li>
+            ))}
+          </ol>
+
+          <button
+            type="button"
+            onClick={shuffle}
+            className="link-draw mt-4 pb-0.5 text-sm text-ink/70"
+            aria-label="ערבבו את סדר התפקידים"
+          >
+            ({site.rolesNote}) ↻
+          </button>
+        </div>
+
+        {photoOk && (
+          <motion.figure
+            initial={{ opacity: 0, scale: 0.92, rotate: -6 }}
+            animate={{ opacity: 1, scale: 1, rotate: -2 }}
+            transition={{ duration: 0.7, delay: 0.5, ease }}
+            className="mx-auto w-44 border-2 border-ink bg-paper p-2 shadow-[4px_4px_0_0_#111] md:w-full"
+          >
+            <img
+              src={site.deanPhoto}
+              alt={site.deanAlt}
+              width={480}
+              height={640}
+              decoding="async"
+              onError={() => setPhotoOk(false)}
+              className="aspect-[3/4] w-full object-cover"
+            />
+          </motion.figure>
+        )}
+      </div>
 
       <div className="mt-14 max-w-2xl space-y-3 text-xl leading-relaxed sm:text-2xl">
         {site.jingle.map((line, i) => (
@@ -101,8 +163,9 @@ export default function Hero() {
                 strokeWidth="3"
                 strokeLinecap="round"
                 vectorEffect="non-scaling-stroke"
-          initial={{ pathLength: 0 } as never}
-whileInView={{ pathLength: 1 } as never}
+                // cast: טיפוסי framer-motion מתנגשים עם pathLength של SVG
+                initial={{ pathLength: 0 } as never}
+                whileInView={{ pathLength: 1 } as never}
                 viewport={{ once: true }}
                 transition={{ duration: 0.9, delay: 0.6, ease }}
               />

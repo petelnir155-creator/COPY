@@ -71,7 +71,7 @@ export default function Nav() {
                 <span dir="ltr" className="block overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_10%,#000_90%,transparent)]">
                   <span
                     dir="ltr"
-                    className="flex w-max animate-marquee hover:[animation-play-state:paused] motion-reduce:animate-none"
+                    className="flex w-max animate-marquee [animation-direction:reverse] hover:[animation-play-state:paused] motion-reduce:animate-none"
                     style={{ animationDuration: "34s" }}
                   >
                     {[0, 1, 2, 3, 4, 5].map((i) => (

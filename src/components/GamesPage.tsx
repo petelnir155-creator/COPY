@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ComponentType } from "react";
 import { site } from "../data/site";
-import Football from "./games/Football";
+import Football from "./games/FootballGame";
 import Basketball from "./games/Basketball";
 import TableTennis from "./games/TableTennis";
 import type { GameProps } from "./games/GameOverModal";

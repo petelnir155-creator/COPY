@@ -324,8 +324,8 @@ export function createFootball3D(
         bt.needsUpdate = true;
       });
     } catch {}
-    const banner = new THREE.Mesh(new THREE.PlaneGeometry(46, 5.2), new THREE.MeshBasicMaterial({ map: bt, color: 0xd8d8d8 }));
-    const bp = standPt(0, -3.9);
+    const banner = new THREE.Mesh(new THREE.PlaneGeometry(31, 3.9), new THREE.MeshBasicMaterial({ map: bt, color: 0xd8d8d8 }));
+    const bp = standPt(0, -3.6);
     banner.position.set(0, bp.y + 0.1, bp.z + 0.14);
     banner.rotation.x = -0.62;
     scene.add(banner);
@@ -361,11 +361,9 @@ export function createFootball3D(
   };
   const LONG = ["הלוואי יכולתי להעסיק אותך", "אבל אני דמות תלת ממדית", "בתיק העבודות המטופש שלך!!!"];
   const signDefs = [
-    { x: -14, v: 3.2, w: 10, h: 5, lines: LONG, bg: "#c8141f", fg: "#ffffff" },
-    { x: 13, v: 3.6, w: 10, h: 5, lines: LONG, bg: "#ffffff", fg: "#c8141f" },
-    { x: -1, v: 5.4, w: 7.4, h: 3.0, lines: ["פטל יא מלך"], bg: "#ffffff", fg: "#c8141f" },
-    { x: -27, v: 4.6, w: 7, h: 2.8, lines: ["פטל יא מלך"], bg: "#c8141f", fg: "#ffffff" },
-    { x: 26, v: 5.2, w: 7, h: 2.8, lines: ["פטל יא מלך"], bg: "#c8141f", fg: "#ffffff" },
+    { x: -10.5, v: 1.3, w: 9, h: 4.5, lines: LONG, bg: "#c8141f", fg: "#ffffff" },
+    { x: 10.5, v: 1.3, w: 9, h: 4.5, lines: LONG, bg: "#ffffff", fg: "#c8141f" },
+    { x: 0, v: 1.9, w: 6.4, h: 2.6, lines: ["פטל יא מלך"], bg: "#ffffff", fg: "#c8141f" },
   ];
   const signGroups: any[] = [];
   for (const d of signDefs) {

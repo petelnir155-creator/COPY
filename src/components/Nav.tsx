@@ -74,8 +74,8 @@ export default function Nav() {
                     className="flex w-max animate-marquee hover:[animation-play-state:paused] motion-reduce:animate-none"
                     style={{ animationDuration: "34s" }}
                   >
-                    {[0, 1].map((i) => (
-                      <span key={i} dir="rtl" aria-hidden={i === 1} className="whitespace-nowrap pe-10">
+                    {[0, 1, 2, 3, 4, 5].map((i) => (
+                      <span key={i} dir="rtl" aria-hidden={i > 0} className="whitespace-nowrap pe-10">
                         {site.coverTabLabel}
                       </span>
                     ))}
@@ -175,9 +175,13 @@ export default function Nav() {
                 initial={{ opacity: 0, x: 24 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.08 + links.length * 0.05, duration: 0.35, ease: [0.2, 0.7, 0.2, 1] }}
-                className="border-t-2 border-ink pt-5 font-sans text-lg font-medium leading-snug"
+                className="pt-2 font-sans text-lg font-medium leading-snug"
               >
-                <a href="#/news" onClick={close} className="block">
+                <a
+                  href="#/news"
+                  onClick={close}
+                  className="block border-2 border-ink px-5 py-3 transition active:bg-ink active:text-paper"
+                >
                   {site.coverTabLabel} ↗
                 </a>
               </motion.li>

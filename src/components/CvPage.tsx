@@ -68,7 +68,24 @@ export default function CvPage() {
                 className="absolute start-0 top-3 h-4 w-4 rounded-full border-2 border-ink bg-paper"
               />
               <h2 className="font-serif text-3xl font-black leading-tight sm:text-5xl">{m.when}</h2>
-              <p className="mt-3 max-w-xl text-lg leading-relaxed sm:text-2xl">{m.text}</p>
+              <p className="mt-3 max-w-xl text-lg leading-relaxed sm:text-2xl">
+                {m.link && m.link.href && m.text.includes(m.link.word) ? (
+                  <>
+                    {m.text.slice(0, m.text.indexOf(m.link.word))}
+                    <a
+                      href={m.link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold text-accent underline decoration-2 underline-offset-4 hover:text-ink"
+                    >
+                      {m.link.word}
+                    </a>
+                    {m.text.slice(m.text.indexOf(m.link.word) + m.link.word.length)}
+                  </>
+                ) : (
+                  m.text
+                )}
+              </p>
             </motion.li>
           ))}
 

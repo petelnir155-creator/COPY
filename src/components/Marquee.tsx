@@ -34,14 +34,23 @@ export default function Marquee() {
             className="flex items-center gap-8 ps-8"
           >
             {b.logo ? (
-              // אפור כברירת מחדל (אחיד ושקט), צבע בהובר. להחזרת צבע תמיד: למחוק grayscale.
-              <img
-                src={b.logo}
-                alt={i < brands.length ? b.name : ""}
-                loading="lazy"
-                decoding="async"
-                className="h-14 w-auto grayscale transition duration-300 hover:grayscale-0 sm:h-16"
-              />
+              // תיבה קבועה לכל לוגו: אותו גובה ורוחב מקסימלי, התמונה נכנסת פנימה (contain) בלי להימתח.
+              // כך קבצים בגדלים ופורמטים שונים (PNG/WebP/SVG) נראים כמשפחה אחת.
+              // ברירת מחדל: אפור, בהובר צבע. "mono": צללית בצבע הדיו (ללוגו שטוח, כולל צהוב).
+              <span className="flex h-14 w-36 items-center justify-center sm:h-16 sm:w-44">
+                <img
+                  src={b.logo}
+                  alt={i < brands.length ? b.name : ""}
+                  loading="lazy"
+                  decoding="async"
+                  style={b.scale ? { transform: `scale(${b.scale})` } : undefined}
+                  className={`max-h-full max-w-full object-contain transition duration-300 ${
+                    b.mode === "mono"
+                      ? "[filter:brightness(0)_opacity(.85)] hover:[filter:none]"
+                      : "grayscale hover:grayscale-0"
+                  }`}
+                />
+              </span>
             ) : (
               <span className="whitespace-nowrap font-serif text-4xl font-black sm:text-5xl">{b.name}</span>
             )}

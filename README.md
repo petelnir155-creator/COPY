@@ -67,3 +67,6 @@ npm run build    # בילד (בודק גם טיפוסים)
 ## עיצוב
 
 צבעים ב-`tailwind.config.js`: `paper` (נייר), `ink` (דיו), `accent` (אדום-כתום, הצבע היחיד). טקסטים ב-`src/data/site.ts`.
+
+## גרפיקת המשחקונים
+הציורים (אצטדיון, שער, שחקנים, שולחן) נמצאים ב-`src/components/games/art/` כמחרוזות SVG. לשינוי צבעים או פרטים עורכים שם, והקומפוננטות (Football/Basketball/TableTennis) רק מזיזות אותם.

@@ -10,7 +10,7 @@ import type { GameProps } from "./games/GameOverModal";
 const games: { id: string; title: string; blurb?: string; Component: ComponentType<GameProps> }[] = [
   { id: "football", title: "דו-קרב פנדלים", blurb: "הבקעתם? קיבלתם תסריט בחצי מחיר!", Component: Football },
   { id: "basketball", title: "זריקת עונשין", blurb: "קלעתם לסל? קיבלתם גאנט בחינם ממני!", Component: Basketball },
-  { id: "tabletennis", title: "טניס שולחן", Component: TableTennis },
+  { id: "tabletennis", title: "טניס שולחן", blurb: "הצלחתם לעשות נקודה? אסטרטגיית טיקטוק עד מחר אצלכם.", Component: TableTennis },
 ];
 
 export default function GamesPage() {

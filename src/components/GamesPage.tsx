@@ -7,8 +7,8 @@ import type { GameProps } from "./games/GameOverModal";
 
 // להוסיף משחקון: ליצור קומפוננטה ב-src/components/games/ שמקבלת { onMore, onHire }, ולהוסיף שורה כאן.
 const games: { id: string; title: string; blurb: string; Component: ComponentType<GameProps> }[] = [
-  { id: "football", title: "כדורגל", blurb: "פנדלים. בחרו פינה.", Component: Football },
-  { id: "basketball", title: "כדורסל", blurb: "החליקו. זרקו. תתפללו.", Component: Basketball },
+  { id: "football", title: "דו-קרב פנדלים", blurb: "בחרו פינה.", Component: Football },
+  { id: "basketball", title: "זריקת עונשין", blurb: "החליקו. זרקו. תתפללו.", Component: Basketball },
 ];
 
 export default function GamesPage() {
@@ -46,9 +46,8 @@ export default function GamesPage() {
 
       <div className="py-10 sm:py-14">
         <p className="mb-3 text-sm text-ink/60">משחקונים</p>
-        <h1 className="font-serif text-3xl font-black leading-snug sm:text-5xl sm:leading-tight">
-          בזמן שאתם מתלבטים כמה עבודות וכסף להביא לי, הכנתי לכם כמה משחקונים שינעימו את זמנכם. למקרה שמוזיקת
-          המעליות לא עשתה את העבודה
+        <h1 className="font-fun text-3xl font-normal leading-snug sm:text-5xl sm:leading-tight">
+          בזמן שאתם מתלבטים כמה עבודות וכסף להביא לי, הכנתי לכם כמה משחקונים שינעימו את זמנכם.
         </h1>
       </div>
 
@@ -58,7 +57,7 @@ export default function GamesPage() {
             <button type="button" onClick={backToList} className="link-draw pb-0.5 text-sm font-medium">
               ← למשחקונים
             </button>
-            <h2 className="font-serif text-2xl font-black">{active.title}</h2>
+            <h2 className="font-fun text-2xl font-normal">{active.title}</h2>
           </div>
           <active.Component onMore={backToList} onHire={hire} />
         </section>
@@ -71,14 +70,14 @@ export default function GamesPage() {
                 onClick={() => setActiveId(g.id)}
                 className="group block w-full border-2 border-ink p-5 text-start transition hover:bg-ink hover:text-paper active:scale-[0.99]"
               >
-                <span className="block font-serif text-4xl font-black leading-none">{g.title}</span>
+                <span className="block font-fun text-4xl font-normal leading-none">{g.title}</span>
                 <span className="mt-3 block text-base opacity-80">{g.blurb}</span>
                 <span className="mt-5 block text-sm font-medium text-accent">שחקו ↗</span>
               </button>
             </li>
           ))}
           <li>
-            <div className="flex h-full min-h-[9rem] items-center border-2 border-dashed border-ink/40 p-5 font-serif text-2xl font-bold text-ink/50">
+            <div className="flex h-full min-h-[9rem] items-center border-2 border-dashed border-ink/40 p-5 font-fun text-2xl font-normal text-ink/50">
               ועוד משחקונים בהמשך...
             </div>
           </li>

@@ -222,7 +222,7 @@ export default function Football({ onMore, onHire }: GameProps) {
         {/* פססססס */}
         {kicking && (
           <motion.span
-            className="absolute z-10 font-serif text-lg font-black text-accent"
+            className="absolute z-10 font-fun text-lg font-normal text-accent"
             style={{ left: `${midX}%`, top: `${midY - 9}%` }}
             initial={{ opacity: 0, y: 0 }}
             animate={{ opacity: [0, 1, 0], y: -26 }}

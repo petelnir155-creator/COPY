@@ -165,7 +165,7 @@ export default function Basketball({ onMore, onHire }: GameProps) {
 
         {thrown && (
           <motion.div
-            className="absolute z-10 font-serif text-3xl font-black"
+            className="absolute z-10 font-fun text-3xl font-normal"
             style={{ left: "56%", top: "6%" }}
             initial={{ scale: 0, rotate: -12, opacity: 0 }}
             animate={{ scale: 1, rotate: -8, opacity: 1 }}

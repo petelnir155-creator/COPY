@@ -48,10 +48,14 @@ export const projects: Project[] = [
     brand: "מקדונלד'ס",
     category: "creative",
     videos: [
-      yt("FB6vksIdDOg", "תפריט ביג דיל לרגעים שהם ביג דיל"),
+      yt("FB6vksIdDOg", "גלגל שלישי"),
       yt("Rx6o3cpSg0c", "ביג שף"),
-      yt("TzpUIK7hDME", "אחות גדולה"),
+      yt("TzpUIK7hDME", "אחיות"),
+      yt("RgrZvJUYLl4", "אחות קוסמת"),
       yt("R3JLEBE2NO4", "אח קטן"),
+      yt("sPfQzs5zo3o", "מיני דג"),
+      yt("Yr2nrf1wk7I", "אבא מוסרי"),
+      yt("o0ChZdjy_SE", "על הפוטטו"),
     ],
   },
   {

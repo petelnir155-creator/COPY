@@ -12,6 +12,8 @@ export default {
       fontFamily: {
         serif: ['"Frank Ruhl Libre"', "Georgia", "serif"],
         sans: ["Heebo", "system-ui", "sans-serif"],
+        // הפונט השובב של המשחקונים (משקל אחד בלבד, לכן font-normal)
+        fun: ['"Secular One"', "Heebo", "sans-serif"],
       },
       keyframes: {
         marquee: {

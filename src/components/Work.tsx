@@ -33,9 +33,6 @@ export default function Work({ onOpen }: { onOpen: (p: Project) => void }) {
             <p className="mb-2 font-sans text-sm tabular-nums text-ink/60">01</p>
             <h2 className="font-serif text-5xl font-black leading-none sm:text-7xl">עבודות</h2>
           </div>
-          <p className="pb-1 font-sans text-sm tabular-nums text-ink/60" aria-live="polite">
-            {list.length} קמפיינים
-          </p>
         </div>
 
         <div role="tablist" aria-label="סוג עבודות" onKeyDown={onKey} className="mb-10 flex gap-8 border-b-2 border-ink">

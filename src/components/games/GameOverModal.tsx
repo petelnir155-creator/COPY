@@ -39,7 +39,7 @@ export default function GameOverModal({
         transition={{ type: "spring", stiffness: 380, damping: 26 }}
         className="w-full max-w-md border-2 border-ink bg-paper p-6 shadow-[6px_6px_0_0_#FF4A1C]"
       >
-        <p className="font-serif text-2xl font-black leading-snug sm:text-3xl">{message}</p>
+        <p className="font-fun text-2xl font-normal leading-snug sm:text-3xl">{message}</p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <button
             ref={firstRef}

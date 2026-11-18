@@ -44,11 +44,11 @@ export default function Football3D({ onMore, onHire, onFail }: GameProps & { onF
 
   useEffect(() => {
     if (phase === "run") {
-      const t = window.setTimeout(() => setPhase("kick"), 800);
+      const t = window.setTimeout(() => setPhase("kick"), 950);
       return () => window.clearTimeout(t);
     }
     if (phase === "kick") {
-      const t = window.setTimeout(() => setPhase("done"), 2700);
+      const t = window.setTimeout(() => setPhase("done"), 3100);
       return () => window.clearTimeout(t);
     }
   }, [phase]);
@@ -93,7 +93,7 @@ export default function Football3D({ onMore, onHire, onFail }: GameProps & { onF
             style={{ left: `${fx.x}%`, top: `${fx.y - 8}%`, x: "-50%" }}
             initial={{ opacity: 0, y: 0 }}
             animate={{ opacity: [0, 1, 0], y: -26 }}
-            transition={{ delay: 0.75, duration: 1.3 }}
+            transition={{ delay: 0.82, duration: 0.65 }}
           >
             פססססס…
           </motion.span>

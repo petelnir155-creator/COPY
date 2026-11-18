@@ -10,11 +10,14 @@ export type CornerId = "tl" | "tr" | "bl" | "br";
 const GOAL_W = 7.32;
 const GOAL_H = 2.44;
 const SPOT_Z = 11;
+const RUN_T = 0.95; // משך ההרצה (שניות), תואם ל-Football3D.tsx
+const KL = 0.26; // רגע המגע בכדור (מתחילת הבעיטה)
+const KP = 0.82; // רגע ההתפנצ'רות
 const TARGETS: Record<CornerId, { x: number; y: number }> = {
-  tl: { x: -2.9, y: 2.0 },
-  tr: { x: 2.9, y: 2.0 },
-  bl: { x: -2.9, y: 0.55 },
-  br: { x: 2.9, y: 0.55 },
+  tl: { x: -2.8, y: 2.08 },
+  tr: { x: 2.8, y: 2.08 },
+  bl: { x: -2.8, y: 0.95 },
+  br: { x: 2.8, y: 0.95 },
 };
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -287,10 +290,13 @@ function makePlayer(o: { jersey: string; shorts: string; sock: string; hair: str
     knee.add(mesh(new THREE.CapsuleGeometry(0.06, 0.33, 6, 14), sock, 0, -0.22, 0));
     const band = mesh(new THREE.CylinderGeometry(0.064, 0.064, 0.04, 14), M("#111114", 0.8), 0, -0.2, 0);
     knee.add(band);
-    const foot = mesh(new THREE.CapsuleGeometry(0.05, 0.17, 6, 12), shoe, 0, -0.455, -0.06);
+    const ankle = new THREE.Group();
+    ankle.position.y = -0.44;
+    knee.add(ankle);
+    const foot = mesh(new THREE.CapsuleGeometry(0.05, 0.17, 6, 12), shoe, 0, -0.015, -0.06);
     foot.rotation.x = Math.PI / 2;
-    knee.add(foot);
-    return { hip, knee };
+    ankle.add(foot);
+    return { hip, knee, ankle };
   });
 
   const torso = new THREE.Group();
@@ -358,6 +364,7 @@ function resetPose(p: Rig) {
   for (const l of p.legs) {
     l.hip.rotation.set(0, 0, 0);
     l.knee.rotation.set(0, 0, 0);
+    l.ankle.rotation.set(0, 0, 0);
   }
   for (const a of p.arms) {
     a.sh.rotation.set(0, 0, 0);
@@ -420,7 +427,7 @@ export function createFootball3D(
   scene.fog = new THREE.FogExp2(0x070a12, 0.016);
 
   const camera = new THREE.PerspectiveCamera(38, 4 / 3, 0.1, 200);
-  const CAM = new THREE.Vector3(0, 2.05, 16.9);
+  const CAM = new THREE.Vector3(0, 2.05, 18);
   const LOOK = new THREE.Vector3(0, 1.2, 2);
   camera.position.copy(CAM);
   camera.lookAt(LOOK);
@@ -580,7 +587,7 @@ export function createFootball3D(
   scene.add(ball);
 
   // חלקיקים: אוויר ואבק (ספרייטים בודדים)
-  const puffs = Array.from({ length: 10 }, () => {
+  const puffs = Array.from({ length: 14 }, () => {
     const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, transparent: true, opacity: 0, depthWrite: false }));
     s.scale.set(0.01, 0.01, 1);
     scene.add(s);
@@ -593,7 +600,7 @@ export function createFootball3D(
   let target = TARGETS.tl;
   let targetId: CornerId = "tl";
   let punctured = false;
-  const A = V(-3.1, 0, 13.4);
+  const A = V(-1.8, 0, 13.0);
   const B = V(-0.12, 0, 11.55);
   let sway0 = 0;
 
@@ -601,7 +608,6 @@ export function createFootball3D(
     const v = new THREE.Vector3(x, y, z).project(camera);
     return { x: ((v.x + 1) / 2) * 100, y: ((1 - v.y) / 2) * 100 };
   };
-  const corners = (Object.keys(TARGETS) as CornerId[]).map((id) => ({ id, ...project(TARGETS[id].x, TARGETS[id].y, 0) }));
 
   const punctureAt = (id: CornerId) => {
     const t = TARGETS[id];
@@ -616,6 +622,8 @@ export function createFootball3D(
     camera.updateProjectionMatrix();
   }
   resize();
+  camera.updateMatrixWorld(true);
+  const corners = (Object.keys(TARGETS) as CornerId[]).map((id) => ({ id, ...project(TARGETS[id].x, TARGETS[id].y, 0) }));
   const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(resize) : null;
   ro?.observe(host);
   cb.onReady(corners);
@@ -659,9 +667,8 @@ export function createFootball3D(
 
     resetPose(striker);
     resetPose(keeper);
-    let shakeX = 0;
-    let shakeY = 0;
-    let camZ = CAM.z;
+    const camPos = CAM.clone();
+    const look = LOOK.clone();
 
     // ---- שוער ----
     const swayX = Math.sin(now * ((Math.PI * 2) / 2.4)) * 0.85;
@@ -686,43 +693,61 @@ export function createFootball3D(
     const sp = striker.root;
     let ballPos = null as any;
 
+    // מחזור הליכה: p במחזורים. מחזיר זוויות ירך/ברך/קרסול לרגל אחת
+    const gait = (p: number, amp: number) => {
+      const w = Math.PI * 2 * p;
+      const c = Math.cos(w);
+      const sw = Math.max(0, Math.sin(w - Math.PI));
+      const hip = (0.52 * c + 0.1) * amp;
+      const knee = -(0.28 * Math.max(0, Math.sin(w)) + 1.6 * Math.pow(sw, 1.15)) * amp - 0.08;
+      const ankle = sw > 0 ? -(hip + knee) * 0.5 - 0.35 * sw : -(hip + knee) * 0.85;
+      return { hip, knee, ankle };
+    };
+
     if (phase === "pick") {
       sp.position.copy(A);
       sp.rotation.y = 0;
-      const br = Math.sin(now * 2) * 0.012;
-      striker.torso.rotation.x = br;
+      striker.torso.rotation.x = Math.sin(now * 2) * 0.012;
       striker.arms[0].sh.rotation.x = 0.1;
       striker.arms[1].sh.rotation.x = -0.1;
       striker.arms[0].sh.rotation.z = -0.1;
       striker.arms[1].sh.rotation.z = 0.1;
       striker.arms[0].el.rotation.x = 0.35;
       striker.arms[1].el.rotation.x = 0.35;
-      camera.position.set(CAM.x + Math.sin(now * 0.4) * 0.04, CAM.y, CAM.z);
+      camPos.x += Math.sin(now * 0.4) * 0.05;
     } else if (phase === "run") {
-      const u = clamp(t / 0.8);
+      const u = clamp(t / RUN_T);
       const e = easeInOut(u);
       sp.position.set(lerp(A.x, B.x, e), 0, lerp(A.z, B.z, e));
-      const dx = B.x - A.x;
-      const dz = B.z - A.z;
-      const yaw = Math.atan2(-dx, -dz);
-      sp.rotation.y = yaw * (1 - easeIn(clamp((u - 0.55) / 0.45)));
-      const ph = t * 15;
-      const s = Math.sin(ph);
-      striker.legs[0].hip.rotation.x = s * 0.95;
-      striker.legs[1].hip.rotation.x = -s * 0.95;
-      striker.legs[0].knee.rotation.x = -Math.max(0, Math.sin(ph + 1.6)) * 1.5 - 0.1;
-      striker.legs[1].knee.rotation.x = -Math.max(0, Math.sin(ph + 1.6 + Math.PI)) * 1.5 - 0.1;
-      striker.arms[0].sh.rotation.x = -s * 0.9;
-      striker.arms[1].sh.rotation.x = s * 0.9;
-      striker.arms[0].el.rotation.x = 1.0;
-      striker.arms[1].el.rotation.x = 1.0;
-      striker.torso.rotation.x = -0.2;
-      striker.torso.rotation.y = s * 0.12;
-      sp.position.y = Math.abs(s) * 0.05;
-      camera.position.set(CAM.x, CAM.y, lerp(CAM.z, CAM.z - 0.5, e));
-      camZ = camera.position.z;
+      const yaw = Math.atan2(-(B.x - A.x), -(B.z - A.z));
+      sp.rotation.y = yaw * (1 - easeIn(clamp((u - 0.5) / 0.5)));
+      const amp = clamp(Math.sin(Math.PI * u) * 1.25 + 0.3, 0, 1);
+      const p = t * 1.75;
+      const g0 = gait(p, amp);
+      const g1 = gait(p + 0.5, amp);
+      const L = striker.legs[0];
+      const R = striker.legs[1];
+      L.hip.rotation.x = g0.hip;
+      L.knee.rotation.x = g0.knee;
+      L.ankle.rotation.x = g0.ankle;
+      R.hip.rotation.x = g1.hip;
+      R.knee.rotation.x = g1.knee;
+      R.ankle.rotation.x = g1.ankle;
+      const swing = Math.cos(Math.PI * 2 * p) * 0.6 * amp;
+      striker.arms[0].sh.rotation.x = swing;
+      striker.arms[1].sh.rotation.x = -swing;
+      striker.arms[0].sh.rotation.z = 0.08;
+      striker.arms[1].sh.rotation.z = -0.08;
+      striker.arms[0].el.rotation.x = 1.15 + swing * 0.3;
+      striker.arms[1].el.rotation.x = 1.15 - swing * 0.3;
+      striker.torso.rotation.x = -0.2 * amp;
+      striker.torso.rotation.y = Math.sin(Math.PI * 2 * p) * 0.16 * amp;
+      striker.pelvis.rotation.y = -Math.sin(Math.PI * 2 * p) * 0.1 * amp;
+      striker.head.rotation.y = -striker.torso.rotation.y * 0.6;
+      sp.position.y = 0.045 * amp * (0.5 - 0.5 * Math.cos(4 * Math.PI * p));
+      camPos.z = lerp(CAM.z, CAM.z - 0.6, e);
     } else {
-      // בעיטה
+      // ---- בעיטה ----
       const kt = t;
       sp.position.copy(B);
       sp.rotation.y = 0;
@@ -730,98 +755,134 @@ export function createFootball3D(
       const L = striker.legs[0];
       let hip = 0;
       let knee = 0;
-      if (kt < 0.18) {
-        const s = easeOut(kt / 0.18);
-        hip = -0.95 * s;
-        knee = -1.7 * s;
-      } else if (kt < 0.3) {
-        const s = easeIn((kt - 0.18) / 0.12);
-        hip = lerp(-0.95, 1.25, s);
-        knee = lerp(-1.7, -0.15, s);
-      } else if (kt < 0.9) {
-        const s = easeOut((kt - 0.3) / 0.6);
-        hip = lerp(1.25, 0.95, s);
-        knee = lerp(-0.15, -0.4, s);
+      let lean = -0.1;
+      let twist = 0;
+      let hop = 0;
+      if (kt < 0.2) {
+        // כניסה לנעילה: הרגל נשלפת לאחור, הגוף מתאסף
+        const s = easeOut(kt / 0.2);
+        hip = -0.75 * s;
+        knee = -1.55 * s;
+        lean = lerp(-0.1, 0.04, s);
+        twist = -0.28 * s;
+      } else if (kt < KL + 0.02) {
+        // החבטה: הירך מזנקת קדימה, הברך נפתחת רגע לפני המגע
+        const s = easeIn((kt - 0.2) / (KL + 0.02 - 0.2));
+        hip = lerp(-0.75, 1.35, s);
+        knee = lerp(-1.55, -0.1, Math.min(1, s * 1.15));
+        lean = lerp(0.04, -0.22, s);
+        twist = lerp(-0.28, 0.3, s);
+      } else if (kt < 0.62) {
+        // המשך תנועה גבוה, הגוף מתרומם על רגל התמיכה
+        const s = easeOut((kt - KL - 0.02) / (0.62 - KL - 0.02));
+        hip = lerp(1.35, 1.75, s);
+        knee = lerp(-0.1, -0.35, s);
+        lean = lerp(-0.22, -0.12, s);
+        twist = lerp(0.3, 0.2, s);
+        hop = Math.sin(Math.PI * s) * 0.1;
       } else {
-        const s = easeInOut(clamp((kt - 0.9) / 0.5));
-        hip = lerp(0.95, 0.05, s);
-        knee = lerp(-0.4, -0.1, s);
+        const s = easeInOut(clamp((kt - 0.62) / 0.5));
+        hip = lerp(1.75, 0.12, s);
+        knee = lerp(-0.35, -0.14, s);
+        lean = lerp(-0.12, -0.02, s);
+        twist = lerp(0.2, 0, s);
       }
+      sp.position.y = hop;
       R.hip.rotation.x = hip;
       R.knee.rotation.x = knee;
+      R.ankle.rotation.x = -(hip + knee) * 0.3 + (kt > KL ? -0.3 : 0.2);
       L.hip.rotation.x = 0.12;
-      L.knee.rotation.x = -0.18;
-      striker.torso.rotation.x = -0.12 + (kt > 0.2 ? -0.08 : 0);
-      striker.arms[0].sh.rotation.z = -1.05;
-      striker.arms[1].sh.rotation.z = 0.9;
-      striker.arms[0].sh.rotation.x = 0.25;
-      striker.arms[1].sh.rotation.x = -0.2;
-      striker.arms[0].el.rotation.x = 0.3;
+      L.knee.rotation.x = -0.2;
+      L.ankle.rotation.x = hop > 0 ? -0.5 : 0;
+      striker.torso.rotation.x = lean;
+      striker.pelvis.rotation.y = twist * 0.6;
+      striker.torso.rotation.y = twist * 0.5;
+      striker.head.rotation.y = -twist * 0.4;
+      // ידיים: מאזנות, שמאל קדימה-החוצה וימין אחורה
+      const ks = clamp(kt / 0.3);
+      striker.arms[0].sh.rotation.x = lerp(0.1, 0.55, ks);
+      striker.arms[1].sh.rotation.x = lerp(-0.1, -0.5, ks);
+      striker.arms[0].sh.rotation.z = lerp(0, -1.0, ks);
+      striker.arms[1].sh.rotation.z = lerp(0, 0.85, ks);
+      striker.arms[0].el.rotation.x = 0.4;
       striker.arms[1].el.rotation.x = 0.3;
-      // פאדיחה: ידיים לראש
-      const fp = easeInOut(clamp((kt - 0.95) / 0.5));
+
+      // פאדיחה: שתי הידיים על הראש, ראש מורכן, כתפיים רועדות
+      const fp = easeInOut(clamp((kt - 1.0) / 0.45));
       if (fp > 0) {
         for (let i = 0; i < 2; i++) {
           const a = striker.arms[i];
-          a.sh.rotation.x = lerp(a.sh.rotation.x, 2.0, fp);
-          a.sh.rotation.z = lerp(a.sh.rotation.z, (i === 0 ? -1 : 1) * 0.25, fp);
-          a.el.rotation.x = lerp(a.el.rotation.x, 1.5, fp);
+          a.sh.rotation.x = lerp(a.sh.rotation.x, 2.4, fp);
+          a.sh.rotation.z = lerp(a.sh.rotation.z, i === 0 ? 0.3 : -0.3, fp);
+          a.el.rotation.x = lerp(a.el.rotation.x, 2.3, fp);
         }
-        striker.head.rotation.x = 0.18 * fp;
-        striker.torso.rotation.x = lerp(striker.torso.rotation.x, 0.06, fp);
+        striker.head.rotation.x = 0.35 * fp;
+        striker.torso.rotation.x = lerp(striker.torso.rotation.x, 0.22, fp) + Math.sin(kt * 22) * 0.018 * fp;
+        R.hip.rotation.x = lerp(R.hip.rotation.x, 0.1, fp);
+        R.knee.rotation.x = lerp(R.knee.rotation.x, -0.25, fp);
+        L.knee.rotation.x = lerp(L.knee.rotation.x, -0.25, fp);
+        L.hip.rotation.x = lerp(L.hip.rotation.x, 0.12, fp);
       }
 
       // ---- כדור ----
       const P = punctureAt(targetId);
-      if (kt < 0.2) {
+      const dir = target.x < 0 ? -1 : 1;
+      const rest = V(P.x + dir * 0.45, 0.07, P.z - 0.55);
+      if (kt < KL) {
         ballPos = V(0, 0.11, SPOT_Z);
-      } else if (kt < 0.75) {
-        const s = (kt - 0.2) / 0.55;
+      } else if (kt < KP) {
+        const s = (kt - KL) / (KP - KL);
         const e = 1 - Math.pow(1 - s, 1.6);
         ballPos = V(lerp(0, P.x, e), lerp(0.11, P.y, e) + Math.sin(Math.PI * e) * 0.35, lerp(SPOT_Z, P.z, e));
         ball.rotation.x -= 0.5;
         ball.rotation.z += 0.12;
       } else {
-        const a = kt - 0.75;
+        const a = kt - KP;
         const fall = clamp(a / 0.42);
-        const y0 = P.y;
-        let y = lerp(y0, 0.07, easeIn(fall));
+        let y = lerp(P.y, 0.07, easeIn(fall));
         if (a > 0.42) {
           const b = clamp((a - 0.42) / 0.3);
           y = 0.07 + Math.sin(b * Math.PI) * 0.16 * (1 - b);
         }
         const drift = easeOut(clamp(a / 0.9));
-        const dir = target.x < 0 ? -1 : 1;
         ballPos = V(P.x + dir * 0.45 * drift, y, P.z - 0.55 * drift);
         ball.rotation.x -= 0.15 * (1 - drift);
-        // התפנצ'רות: נעשה שטוח וכמעט נפוח מהצד
-        const sq = easeOut(clamp(a / 0.25));
-        ball.scale.set(lerp(1, 1.18, sq), lerp(1, 0.5, sq), lerp(1, 1.18, sq));
+        // נפח שנשפך: שטוח ורחב, עם רטט קטן
+        const sq = easeOut(clamp(a / 0.3));
+        const wob = Math.sin(a * 30) * 0.04 * (1 - clamp(a / 0.8));
+        ball.scale.set(lerp(1, 1.3, sq) + wob, lerp(1, 0.36, sq) - wob, lerp(1, 1.3, sq) + wob);
         if (!punctured) {
           punctured = true;
-          puffs.forEach((p, i) => {
-            p.userData = { t: now, i, x: P.x, y: P.y, z: P.z };
+          puffs.forEach((q, i) => {
+            q.userData = { t: now, i, x: P.x, y: P.y, z: P.z };
           });
         }
       }
 
       // ---- שוער צולל לצד הלא נכון, כמו בגרסה המקורית ----
-      if (kt > 0.25) {
-        const u = easeOut(clamp((kt - 0.25) / 0.5));
-        const dir = target.x < 0 ? 1 : -1;
-        keeperHolder.position.x = lerp(swayX, dir * 3.2, u);
+      if (kt > 0.3) {
+        const u = easeOut(clamp((kt - 0.3) / 0.5));
+        const d = target.x < 0 ? 1 : -1;
+        keeperHolder.position.x = lerp(swayX, d * 3.2, u);
         keeperHolder.position.y = Math.sin(Math.PI * u) * 0.7 + u * 0.3;
-        keeperHolder.rotation.z = -dir * 1.4 * u;
+        keeperHolder.rotation.z = -d * 1.4 * u;
       }
-      // ---- רעידת מצלמה ----
-      const st = kt - 0.7;
+
+      // ---- מצלמה: רעידה בהתפנצ'רות, ואז קלוז-אפ על הכדור המרוסק ----
+      camPos.z = CAM.z - 0.6;
+      const st = kt - KP;
       if (st > 0 && st < 1.3) {
         const k = 1 - st / 1.3;
-        shakeX = Math.sin(st * 70) * 0.05 * k;
-        shakeY = Math.cos(st * 55) * 0.035 * k;
+        camPos.x += Math.sin(st * 70) * 0.05 * k;
+        camPos.y += Math.cos(st * 55) * 0.035 * k;
       }
-      camera.position.set(CAM.x + shakeX, CAM.y + shakeY, CAM.z - 0.5);
-      camZ = camera.position.z;
+      const cu = easeInOut(clamp((kt - 1.45) / 0.8));
+      if (cu > 0) {
+        const endPos = V(rest.x * 0.6, 0.6, rest.z + 2.7);
+        const endLook = V(rest.x, 0.16, rest.z);
+        camPos.lerp(endPos, cu);
+        look.lerp(endLook, cu);
+      }
     }
     if (ballPos) ball.position.copy(ballPos);
     else {
@@ -840,15 +901,15 @@ export function createFootball3D(
         continue;
       }
       const k = a / 1.1;
-      p.position.set(d.x + 0.12 + d.i * 0.05 * k * 4, d.y + k * (0.6 + d.i * 0.08), d.z - k * 0.3);
-      const s = 0.12 + k * 0.55;
+      p.position.set(d.x + 0.12 + d.i * 0.06 * k * 4, d.y + k * (0.5 + d.i * 0.07), d.z - k * 0.35);
+      const s = d.i === 0 ? 0.5 + k * 1.5 : 0.18 + k * 0.8;
       p.scale.set(s, s, 1);
-      p.material.opacity = (1 - k) * 0.55;
+      p.material.opacity = d.i === 0 ? (1 - k) * 0.7 : (1 - k) * 0.6;
       p.material.color.set(d.i % 3 === 0 ? 0xffffff : 0xd9e6d2);
     }
 
-    camera.lookAt(LOOK.x + shakeX * 0.6, LOOK.y + shakeY, LOOK.z);
-    if (phase === "pick") camera.position.z = camZ;
+    camera.position.copy(camPos);
+    camera.lookAt(look);
   }
 
   frame();

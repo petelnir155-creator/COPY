@@ -101,8 +101,8 @@ export default function Hero() {
                 strokeWidth="3"
                 strokeLinecap="round"
                 vectorEffect="non-scaling-stroke"
-              initial={{ pathLength: 0 } as never}
-whileInView={{ pathLength: 1 } as never}
+                // cast: טיפוסי framer-motion מתנגשים עם pathLength של SVG
+                initial={{ pathLength: 0 } as never}
                 whileInView={{ pathLength: 1 } as never}
                 viewport={{ once: true }}
                 transition={{ duration: 0.9, delay: 0.6, ease }}

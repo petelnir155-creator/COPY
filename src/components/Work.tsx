@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { motion } from "framer-motion";
 import { categories, projects } from "../data/projects";
@@ -8,6 +8,16 @@ import ProjectCard from "./ProjectCard";
 export default function Work({ onOpen }: { onOpen: (p: Project) => void }) {
   const [tab, setTab] = useState<Category>("creative");
   const list = useMemo(() => projects.filter((p) => p.category === tab), [tab]);
+
+  // התפריט הצדדי במובייל מחליף טאב דרך אירוע
+  useEffect(() => {
+    const onSetTab = (e: Event) => {
+      const key = (e as CustomEvent<Category>).detail;
+      if (key === "creative" || key === "social") setTab(key);
+    };
+    window.addEventListener("site:set-tab", onSetTab);
+    return () => window.removeEventListener("site:set-tab", onSetTab);
+  }, []);
 
   const onKey = (e: KeyboardEvent) => {
     if (e.key === "ArrowLeft" || e.key === "ArrowRight") {

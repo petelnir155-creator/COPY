@@ -31,10 +31,11 @@ export default function Hero() {
       </motion.p>
 
       <h1 className="font-serif text-[clamp(5rem,27vw,17rem)] font-black leading-[0.85] tracking-tight">
-        <span className="block overflow-hidden pb-[0.06em]">
+        {/* ריפוד עליון + מרג'ין שלילי: המסכה גבוהה מספיק לא לחתוך את הקצה העליון של ל' */}
+        <span className="-mt-[0.22em] block overflow-hidden pb-[0.08em] pt-[0.22em]">
           <motion.span
             className="block"
-            initial={{ y: "105%" }}
+            initial={{ y: "130%" }}
             animate={{ y: 0 }}
             transition={{ duration: 0.9, ease }}
           >

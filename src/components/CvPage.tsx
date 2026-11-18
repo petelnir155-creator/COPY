@@ -37,11 +37,11 @@ export default function CvPage() {
         <p className="mb-3 text-sm text-ink/60">הגרסה המלאה</p>
         <h1 className="font-serif text-6xl font-black leading-[0.95] sm:text-8xl">קורות חיים</h1>
         <p className="mt-6 max-w-xl text-lg text-ink/80">
-          הגרסה הרשמית נמצאת בקובץ ה-PDF.{" "}
+          הגרסה הרשמית נמצאת{" "}
           <a href={site.cv} download className="link-draw pb-0.5 font-medium text-ink">
-            הורדה
+            כאן
           </a>
-          . הגרסה הזאת היא הנכונה יותר.
+          . אבל לא יודע, משהו בגרסה הזאת נגע בי
         </p>
       </div>
 

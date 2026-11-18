@@ -96,41 +96,46 @@ export default function Basketball({ onMore, onHire }: GameProps) {
           <div className="absolute bottom-[3%] left-[10%] w-[22%]">
             <motion.div
               initial={false}
-              animate={thrown ? { y: [0, -9, 0] } : { y: 0 }}
-              transition={thrown ? { duration: 0.55 } : { duration: 0 }}
+              animate={thrown ? { y: [0, -9, 0] } : { y: [0, -2, 0] }}
+              transition={thrown ? { duration: 0.55 } : { duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
             >
               <Svg html={hooper(thrown)} viewBox="0 0 100 160" />
             </motion.div>
           </div>
 
-          {/* הכדור: קשת, נתקע על החישוק ושוקע איתו */}
-          <motion.div
-            className="pointer-events-none absolute w-[16%]"
-            style={{ x: "-50%", y: "-50%" }}
-            initial={false}
-            animate={
-              thrown
-                ? {
-                    left: [`${HOLD.x}%`, "55%", `${RIM.x}%`, `${RIM.x}%`, `${RIM.x}%`, `${RIM.x}%`, `${RIM.x}%`],
-                    top: [`${HOLD.y}%`, "14%", `${RIM.y}%`, `${RIM.y}%`, `${RIM.y + 2.4}%`, `${RIM.y + 1.4}%`, `${RIM.y + 1.9}%`],
-                    rotate: [0, 300, 540, 540, 552, 540, 546],
-                  }
-                : { left: `${HOLD.x}%`, top: `${HOLD.y}%`, rotate: 0 }
-            }
-            transition={
-              thrown
-                ? {
-                    duration: TOTAL,
-                    times: [0, 0.24, 0.37, 0.4, 0.46, 0.5, 1],
-                    ease: ["easeOut", "easeIn", "linear", "easeOut", "easeInOut", "easeOut"],
-                  }
-                : { duration: 0 }
-            }
-          >
-            <div className="aspect-square w-full">
-              <Svg html={basketBall()} viewBox="0 0 40 40" />
-            </div>
-          </motion.div>
+          {/* הכדור: קשת, נתקע על החישוק ושוקע איתו. שלושה צללים בהירים מאחוריו יוצרים שובל בזמן הטיסה */}
+          {[3, 2, 1, 0].map((k) => (
+            <motion.div
+              key={k}
+              className="pointer-events-none absolute w-[16%]"
+              style={{ x: "-50%", y: "-50%" }}
+              initial={false}
+              animate={
+                thrown
+                  ? {
+                      left: [`${HOLD.x}%`, "55%", `${RIM.x}%`, `${RIM.x}%`, `${RIM.x}%`, `${RIM.x}%`, `${RIM.x}%`],
+                      top: [`${HOLD.y}%`, "14%", `${RIM.y}%`, `${RIM.y}%`, `${RIM.y + 2.4}%`, `${RIM.y + 1.4}%`, `${RIM.y + 1.9}%`],
+                      rotate: [0, 300, 540, 540, 552, 540, 546],
+                      ...(k > 0 ? { opacity: [0.28 - k * 0.07, 0.28 - k * 0.07, 0.2 - k * 0.05, 0, 0, 0, 0] } : {}),
+                    }
+                  : { left: `${HOLD.x}%`, top: `${HOLD.y}%`, rotate: 0, opacity: k > 0 ? 0 : 1 }
+              }
+              transition={
+                thrown
+                  ? {
+                      duration: TOTAL,
+                      delay: k * 0.045,
+                      times: [0, 0.24, 0.37, 0.4, 0.46, 0.5, 1],
+                      ease: ["easeOut", "easeIn", "linear", "easeOut", "easeInOut", "easeOut"],
+                    }
+                  : { duration: 0 }
+              }
+            >
+              <div className="aspect-square w-full">
+                <Svg html={basketBall()} viewBox="0 0 40 40" />
+              </div>
+            </motion.div>
+          ))}
 
           {thrown && (
             <>
@@ -154,6 +159,7 @@ export default function Basketball({ onMore, onHire }: GameProps) {
               </motion.div>
             </>
           )}
+
         </motion.div>
 
         <Svg html={basketOverlay()} viewBox="0 0 400 300" className="pointer-events-none absolute inset-0 h-full w-full" />

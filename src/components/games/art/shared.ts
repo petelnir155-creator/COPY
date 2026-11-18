@@ -41,7 +41,9 @@ export function crowdRows(opts: {
   for (let i = 0; i < fl; i++) {
     const x = r() * 400;
     const y = opts.y0 + r() * (opts.y1 - opts.y0);
-    out += `<circle cx="${f(x)}" cy="${f(y)}" r="1.6" fill="#fff" opacity=".9"/><circle cx="${f(x)}" cy="${f(y)}" r="4.5" fill="#fff" opacity=".18"/>`;
+    const dur = f(1.4 + r() * 2.6);
+    const begin = f(r() * 3);
+    out += `<g opacity="0"><circle cx="${f(x)}" cy="${f(y)}" r="1.6" fill="#fff"/><circle cx="${f(x)}" cy="${f(y)}" r="4.5" fill="#fff" opacity=".25"/><animate attributeName="opacity" values="0;0;1;0;0" keyTimes="0;.6;.64;.7;1" dur="${dur}s" begin="${begin}s" repeatCount="indefinite"/></g>`;
   }
   return out;
 }
@@ -68,3 +70,48 @@ export function adBoards(y: number, h: number, seed: number) {
 
 export const skin = "#E6C3A3";
 export const skinShade = "#C9A084";
+
+// ---------- כלים לציור "נפחי" ----------
+export type P = [number, number];
+
+// צינור מתחדד לאורך פוליליין (לגפיים): מחזיר path עם עיגולים במפרקים, כך שהצורה נראית מלאה ורכה
+export function tube(pts: P[], ws: number[], fill: string, extra = ""): string {
+  const n = pts.length;
+  const L: P[] = [];
+  const R: P[] = [];
+  for (let i = 0; i < n; i++) {
+    const a = pts[Math.max(0, i - 1)];
+    const b = pts[Math.min(n - 1, i + 1)];
+    let dx = b[0] - a[0];
+    let dy = b[1] - a[1];
+    const len = Math.hypot(dx, dy) || 1;
+    dx /= len;
+    dy /= len;
+    const w = ws[i] / 2;
+    L.push([pts[i][0] - dy * w, pts[i][1] + dx * w]);
+    R.push([pts[i][0] + dy * w, pts[i][1] - dx * w]);
+  }
+  const poly = [...L, ...R.reverse()].map((p) => `${f(p[0])},${f(p[1])}`).join(" ");
+  const caps = pts.map((p, i) => `<circle cx="${f(p[0])}" cy="${f(p[1])}" r="${f(ws[i] / 2)}"/>`).join("");
+  return `<g fill="${fill}" ${extra}><polygon points="${poly}"/>${caps}</g>`;
+}
+
+// גפה עם תאורה: צבע בסיס, פס צל בצד ימין ופס אור בצד שמאל (מקור האור משמאל-למעלה)
+export function limb(pts: P[], ws: number[], base: string, dark = "#000", light = "#fff", dx = 0.22): string {
+  const off = (k: number): P[] => pts.map((p) => [p[0] + ws[0] * k, p[1]]);
+  return (
+    tube(pts, ws, base) +
+    tube(off(dx), ws.map((w) => w * 0.5), dark, 'opacity=".26"') +
+    tube(off(-dx), ws.map((w) => w * 0.2), light, 'opacity=".28"')
+  );
+}
+
+// הגדרות משותפות: גרגר פילם, טשטוש לעומק שדה, טקסטורת דשא
+export function fxDefs(p: string) {
+  return `
+  <filter id="${p}Blur1" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="1.1"/></filter>
+  <filter id="${p}Blur2" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="2.4"/></filter>
+  <filter id="${p}Soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.5"/></filter>
+  <filter id="${p}Grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  1.6 0 0 0 -.55"/></filter>
+  <filter id="${p}Turf" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".03 .9" numOctaves="3" seed="4" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 .08  0 0 0 0 0  1.8 0 0 0 -.62"/></filter>`;
+}

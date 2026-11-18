@@ -6,7 +6,7 @@ export default function Marquee() {
   // (בערך 70 פיקסל לשנייה) בין אם יש 12 לוגואים ובין אם 22.
   const half = brands.length >= 14 ? brands : [...brands, ...brands];
   const track = [...half, ...half];
-  const duration = `${Math.round(half.length * 2.2)}s`;
+  const duration = `${Math.round(half.length * 3.4)}s`;
 
   return (
     <section
@@ -21,6 +21,8 @@ export default function Marquee() {
         חלק מהמותגים שהסכימו לעבוד איתי
       </h2>
 
+      {/* העטיפה ב-ltr קריטית: בדף RTL מסלול רחב נצמד לצד ימין, והאנימציה שמזיזה שמאלה חושפת רווח ריק */}
+      <div dir="ltr">
       <div
         dir="ltr"
         className="flex w-max animate-marquee items-center hover:[animation-play-state:paused] motion-reduce:animate-none"
@@ -59,6 +61,7 @@ export default function Marquee() {
             </span>
           </div>
         ))}
+      </div>
       </div>
     </section>
   );

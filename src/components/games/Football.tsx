@@ -37,7 +37,7 @@ export default function Football({ onMore, onHire }: GameProps) {
       };
     }
     if (phase === "kick") {
-      const t = window.setTimeout(() => setPhase("done"), 2500);
+      const t = window.setTimeout(() => setPhase("done"), 2700);
       return () => window.clearTimeout(t);
     }
   }, [phase]);
@@ -57,6 +57,13 @@ export default function Football({ onMore, onHire }: GameProps) {
   return (
     <div>
       <div className="relative mx-auto aspect-[4/3] w-full max-w-xl select-none overflow-hidden border-2 border-ink bg-ink">
+        {/* רעידת מצלמה קלה ברגע שהכדור מתפנצ'ר */}
+        <motion.div
+          className="absolute inset-0"
+          initial={false}
+          animate={kicking ? { x: [0, 0, -3, 3, -2, 2, 0] } : { x: 0 }}
+          transition={kicking ? { duration: 1.3, delay: 0.7, times: [0, 0.15, 0.3, 0.5, 0.65, 0.8, 1] } : { duration: 0 }}
+        >
         <Svg html={footballScene()} viewBox="0 0 400 300" className="absolute inset-0 h-full w-full" />
 
         {/* שוער: מתנדנד, ואחרי הבעיטה צולל לצד השני */}
@@ -161,8 +168,20 @@ export default function Football({ onMore, onHire }: GameProps) {
             >
               פססססס…
             </motion.span>
+            {/* אוויר שיוצא מהכדור */}
+            {[0, 1, 2].map((i) => (
+              <motion.span
+                key={i}
+                className="absolute h-2 w-2 rounded-full bg-paper/70"
+                style={{ left: `${midX + 1}%`, top: `${midY}%` }}
+                initial={{ opacity: 0, x: 0, y: 0, scale: 0.4 }}
+                animate={{ opacity: [0, 0.9, 0], x: 10 + i * 8, y: -(8 + i * 9), scale: [0.4, 1.2, 1.6] }}
+                transition={{ delay: 0.72 + i * 0.12, duration: 0.7, ease: "easeOut" }}
+              />
+            ))}
           </>
         )}
+        </motion.div>
 
         <Svg html={footballOverlay()} viewBox="0 0 400 300" className="pointer-events-none absolute inset-0 h-full w-full" />
 

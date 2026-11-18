@@ -80,6 +80,13 @@ export default function TableTennis({ onMore, onHire }: GameProps) {
   return (
     <div>
       <div className="relative mx-auto aspect-[4/3] w-full max-w-xl select-none overflow-hidden border-2 border-ink bg-ink">
+        {/* רעידת מצלמה בנחיתה */}
+        <motion.div
+          className="absolute inset-0"
+          initial={false}
+          animate={broken ? { x: [0, -4, 4, -3, 2, 0], y: [0, 3, -2, 2, -1, 0] } : { x: 0, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
         <Svg html={tennisScene()} viewBox="0 0 400 300" className="absolute inset-0 h-full w-full" />
 
         {/* השולחן ביד: מאחורי הגוף, נתפס בקצה */}
@@ -100,8 +107,8 @@ export default function TableTennis({ onMore, onHire }: GameProps) {
           transition={thrown ? { delay: 0.45, duration: 1.5, ease: "easeIn" } : { duration: 0 }}
         >
           <motion.div
-            animate={pose === "runA" || pose === "runB" ? { y: [0, -6, 0] } : { y: 0 }}
-            transition={pose === "runA" || pose === "runB" ? { duration: 0.3, repeat: Infinity } : { duration: 0.1 }}
+            animate={pose === "runA" || pose === "runB" ? { y: [0, -6, 0] } : pose === "idle" ? { y: [0, -2, 0] } : { y: 0 }}
+            transition={pose === "runA" || pose === "runB" ? { duration: 0.3, repeat: Infinity } : pose === "idle" ? { duration: 2.4, repeat: Infinity, ease: "easeInOut" } : { duration: 0.1 }}
           >
             <Svg html={tennisPlayer(shownPose)} viewBox="0 0 100 160" />
           </motion.div>
@@ -166,8 +173,19 @@ export default function TableTennis({ onMore, onHire }: GameProps) {
             >
               קראש!
             </motion.div>
+            {/* שופט הכיסא מכריז */}
+            <motion.div
+              className="absolute z-20 -translate-x-1/2 border-2 border-ink bg-paper px-2 py-0.5 font-fun text-lg font-normal leading-tight"
+              style={{ left: "82%", top: "36%" }}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.7, type: "spring", stiffness: 500, damping: 18 }}
+            >
+              אאוט!
+            </motion.div>
           </>
         )}
+        </motion.div>
 
         <Svg html={tennisOverlay()} viewBox="0 0 400 300" className="pointer-events-none absolute inset-0 h-full w-full" />
 

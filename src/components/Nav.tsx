@@ -68,7 +68,7 @@ export default function Nav() {
                 title={site.coverTabLabel}
                 className="block w-72 border-2 border-ink px-4 py-2 text-base transition hover:bg-ink hover:text-paper xl:w-96"
               >
-                <span className="block overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_10%,#000_90%,transparent)]">
+                <span dir="ltr" className="block overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_10%,#000_90%,transparent)]">
                   <span
                     dir="ltr"
                     className="flex w-max animate-marquee hover:[animation-play-state:paused] motion-reduce:animate-none"

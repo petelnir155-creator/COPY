@@ -303,16 +303,16 @@ export function createFootball3D(
     g.fillRect(0, 242, 2048, 14);
     const draw = () => {
       g.save();
-      g.font = "900 190px Heebo, Arial, sans-serif";
+      g.font = "900 175px Heebo, Arial, sans-serif";
       g.textAlign = "center";
       g.textBaseline = "middle";
       g.lineJoin = "round";
-      for (const x of [340, 1020, 1700]) {
+      for (const x of [520, 1530]) {
         g.lineWidth = 22;
         g.strokeStyle = "#f4efe6";
-        g.strokeText("שער 9", x, 134);
+        g.strokeText("פטל יא מלך", x, 134);
         g.fillStyle = "#0a0a0c";
-        g.fillText("שער 9", x, 134);
+        g.fillText("פטל יא מלך", x, 134);
       }
       g.restore();
     };
@@ -329,6 +329,64 @@ export function createFootball3D(
     banner.position.set(0, bp.y + 0.1, bp.z + 0.14);
     banner.rotation.x = -0.62;
     scene.add(banner);
+  }
+
+  // שלטי אוהדים: אדום-לבן, מורמים באוויר
+  const signTex = (lines: string[], bg: string, fg: string, w = 640, h = 320) => {
+    const c = canvas(w, h);
+    const g = c.getContext("2d");
+    const draw = () => {
+      g.fillStyle = bg;
+      g.fillRect(0, 0, w, h);
+      g.strokeStyle = fg;
+      g.lineWidth = 10;
+      g.strokeRect(14, 14, w - 28, h - 28);
+      g.fillStyle = fg;
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      const size = lines.length > 1 ? 50 : 118;
+      g.font = `900 ${size}px Heebo, Arial, sans-serif`;
+      const lh = size * 1.22;
+      lines.forEach((l, i) => g.fillText(l, w / 2, h / 2 + (i - (lines.length - 1) / 2) * lh, w - 60));
+    };
+    draw();
+    const t = tex(c);
+    try {
+      document.fonts?.load("900 60px Heebo").then(() => {
+        draw();
+        t.needsUpdate = true;
+      });
+    } catch {}
+    return t;
+  };
+  const LONG = ["הלוואי יכולתי להעסיק אותך", "אבל אני דמות תלת ממדית", "בתיק העבודות המטופש שלך!!!"];
+  const signDefs = [
+    { x: -14, v: 3.2, w: 10, h: 5, lines: LONG, bg: "#c8141f", fg: "#ffffff" },
+    { x: 13, v: 3.6, w: 10, h: 5, lines: LONG, bg: "#ffffff", fg: "#c8141f" },
+    { x: -1, v: 5.4, w: 7.4, h: 3.0, lines: ["פטל יא מלך"], bg: "#ffffff", fg: "#c8141f" },
+    { x: -27, v: 4.6, w: 7, h: 2.8, lines: ["פטל יא מלך"], bg: "#c8141f", fg: "#ffffff" },
+    { x: 26, v: 5.2, w: 7, h: 2.8, lines: ["פטל יא מלך"], bg: "#c8141f", fg: "#ffffff" },
+  ];
+  const signGroups: any[] = [];
+  for (const d of signDefs) {
+    const grp = new THREE.Group();
+    const bp = standPt(d.x, d.v);
+    grp.position.set(bp.x, bp.y, bp.z + 0.5);
+    grp.rotation.x = -0.62;
+    const sg = new THREE.Mesh(new THREE.PlaneGeometry(d.w, d.h), new THREE.MeshBasicMaterial({ map: signTex(d.lines, d.bg, d.fg, 640, Math.round(640 * d.h / d.w)), side: THREE.DoubleSide, color: 0xe2e2e2 }));
+    grp.add(sg);
+    // מוטות וידיים
+    for (const sx of [-1, 1]) {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, d.h + 1.6, 6), new THREE.MeshBasicMaterial({ color: 0x15161b }));
+      p.position.set(sx * (d.w / 2 - 0.2), -0.7, 0);
+      grp.add(p);
+      const hnd = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 6), new THREE.MeshBasicMaterial({ color: 0xd9b79a }));
+      hnd.position.set(sx * (d.w / 2 - 0.2), -d.h / 2 - 0.2, 0.05);
+      grp.add(hnd);
+    }
+    grp.userData = { ph: Math.random() * 6 };
+    scene.add(grp);
+    signGroups.push(grp);
   }
   const flagTexs = [["#d3202c", "#d3202c"], ["#f4efe6", "#d3202c"], ["#d3202c", "#f4efe6"]].map(([a, b], k) => {
     const c = canvas(64, 40);
@@ -577,6 +635,7 @@ export function createFootball3D(
       fg.rotation.y = Math.sin(now * d.sp + d.ph) * 0.55;
       fg.rotation.z = Math.sin(now * d.sp * 0.7 + d.ph) * 0.1;
     }
+    for (const sg of signGroups) sg.position.y += Math.sin(now * 2.2 + sg.userData.ph) * 0.004;
     flares.forEach((f, i) => {
       const k = 2.6 + Math.sin(now * 17 + i * 3) * 0.5 + Math.sin(now * 5 + i) * 0.4;
       f.scale.set(k, k, 1);

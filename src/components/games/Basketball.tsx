@@ -148,15 +148,15 @@ export default function Basketball({ onMore, onHire }: GameProps) {
               >
                 בונק!
               </motion.div>
-              <motion.div
-                className="absolute z-10 font-fun text-base font-normal text-paper/80"
-                style={{ left: "58%", top: "50%" }}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: [0, 1, 1], y: 0, rotate: [-3, 3, -3] }}
-                transition={{ delay: 1.9, duration: 1.2 }}
-              >
-                קריאאאק…
-              </motion.div>
+              {/* הדגשה: הכדור גדול מהחישוק ותקוע עליו */}
+              <motion.span
+                aria-hidden
+                className="pointer-events-none absolute aspect-square w-[21%] rounded-full border-[3px] border-accent"
+                style={{ left: `${RIM.x}%`, top: `${RIM.y + 1.5}%`, x: "-50%", y: "-50%" }}
+                initial={{ opacity: 0, scale: 1.6 }}
+                animate={{ opacity: [0, 1, 0.35, 1, 0.35, 1], scale: [1.6, 1, 1.08, 1, 1.08, 1] }}
+                transition={{ delay: 1.35, duration: 1.6 }}
+              />
             </>
           )}
 
@@ -188,7 +188,7 @@ export default function Basketball({ onMore, onHire }: GameProps) {
 
         {!thrown && (
           <div className="pointer-events-none absolute end-2.5 top-12 z-10 border-2 border-paper bg-ink px-2.5 py-1 text-sm font-bold text-paper">
-            בהחלקה, זרקו את הכדור
+            החליקו כדי לזרוק
           </div>
         )}
 
@@ -204,7 +204,7 @@ export default function Basketball({ onMore, onHire }: GameProps) {
 
       <div className="mt-4 flex flex-col items-center gap-3 text-center">
         <p className="text-sm text-ink/70" aria-live="polite">
-          {phase === "ready" ? "החליקו כלפי מעלה על השחקן, או לחצו על הכפתור." : "..."}
+          {phase === "ready" ? "החליקו כדי לזרוק." : "..."}
         </p>
         <button
           type="button"

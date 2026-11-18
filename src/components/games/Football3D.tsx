@@ -80,7 +80,7 @@ export default function Football3D({ onMore, onHire, onFail }: GameProps & { onF
               type="button"
               aria-label={`בעיטה ל${(LABELS as Record<string, string>)[c.id]}`}
               onClick={() => pick(c.id)}
-              className="absolute z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 animate-pulse items-center justify-center rounded-full border-2 border-accent bg-ink/50 text-xl font-bold leading-none text-accent transition hover:scale-110 active:scale-90"
+              className="absolute z-10 flex h-10 w-10 sm:h-12 sm:w-12 -translate-x-1/2 -translate-y-1/2 animate-pulse items-center justify-center rounded-full border-2 border-accent bg-ink/50 text-xl font-bold leading-none text-accent transition hover:scale-110 active:scale-90"
               style={{ left: `${c.x}%`, top: `${c.y}%` }}
             >
               +

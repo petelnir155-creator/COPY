@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import type { ComponentType } from "react";
 import { site } from "../data/site";
 import Football from "./games/FootballGame";
-import Basketball from "./games/Basketball";
-import TableTennis from "./games/TableTennis";
+import Basketball from "./games/BasketballGame";
+import TableTennis from "./games/TableTennisGame";
 import type { GameProps } from "./games/GameOverModal";
 
 // להוסיף משחקון: ליצור קומפוננטה ב-src/components/games/ שמקבלת { onMore, onHire }, ולהוסיף שורה כאן.

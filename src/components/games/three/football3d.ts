@@ -3,6 +3,7 @@
 // הקובץ הזה נטען רק בעמוד המשחקים (ראו FootballGame.tsx), ואם משהו נכשל המשחק חוזר לגרסת ה-SVG.
 // מידות במטרים: קו השער z=0, נקודת הפנדל z=11, המצלמה מאחור ב-z≈16.8. ציר x: ימין חיובי.
 import * as THREE from "three";
+import { bar, canvas, clamp, crowdTexture, easeIn, easeInOut, easeOut, gait, glowTexture, lerp, makePlayer, netLines, resetPose, rng, tex } from "./common";
 
 export type Phase = "pick" | "run" | "kick" | "done";
 export type CornerId = "tl" | "tr" | "bl" | "br";
@@ -13,43 +14,14 @@ const SPOT_Z = 11;
 const RUN_T = 0.95; // משך ההרצה (שניות), תואם ל-Football3D.tsx
 const KL = 0.26; // רגע המגע בכדור (מתחילת הבעיטה)
 const KP = 0.82; // רגע ההתפנצ'רות
+// יציע בסגנון "שער 5": ים של אדום ולבן, דגלים, בלוסים ובאנר ענק
+const GATE_PALETTE = ["#d3202c", "#d3202c", "#f4efe6", "#ffffff", "#8f1119", "#111111", "#e63a44", "#f4efe6"];
 const TARGETS: Record<CornerId, { x: number; y: number }> = {
-  tl: { x: -2.8, y: 2.08 },
-  tr: { x: 2.8, y: 2.08 },
-  bl: { x: -2.8, y: 0.95 },
-  br: { x: 2.8, y: 0.95 },
+  tl: { x: -2.8, y: 2.22 },
+  tr: { x: 2.8, y: 2.22 },
+  bl: { x: -2.8, y: 0.6 },
+  br: { x: 2.8, y: 0.6 },
 };
-
-const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
-const easeOut = (t: number) => 1 - Math.pow(1 - t, 2);
-const easeIn = (t: number) => t * t;
-
-function rng(seed: number) {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function canvas(w: number, h: number) {
-  const c = document.createElement("canvas");
-  c.width = w;
-  c.height = h;
-  return c;
-}
-
-function tex(c: HTMLCanvasElement, srgb = true) {
-  const t = new THREE.CanvasTexture(c);
-  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
-  t.anisotropy = 8;
-  return t;
-}
 
 // ---------- טקסטורות ----------
 
@@ -122,38 +94,6 @@ function pitchTexture(mobile: boolean) {
   return t;
 }
 
-function crowdTexture(seed: number, w = 1024, h = 512) {
-  const c = canvas(w, h);
-  const g = c.getContext("2d");
-  const r = rng(seed);
-  g.fillStyle = "#0a0c11";
-  g.fillRect(0, 0, w, h);
-  const palette = ["#F4EFE6", "#FF4A1C", "#8e9a93", "#2a2d35", "#c9c2b3", "#a8421f", "#e6e0d2", "#1e2128"];
-  const skins = ["#d9b79a", "#b98a6a", "#8a5c42", "#e8c9ae"];
-  for (let y = 10; y < h; y += 15) {
-    for (let x = ((y / 15) % 2) * 6; x < w; x += 12) {
-      const px = x + r() * 4;
-      const body = palette[Math.floor(r() * palette.length)];
-      g.fillStyle = body;
-      g.globalAlpha = 0.55 + r() * 0.4;
-      g.beginPath();
-      g.ellipse(px, y + 6, 5.2, 6, 0, 0, Math.PI * 2);
-      g.fill();
-      g.fillStyle = skins[Math.floor(r() * skins.length)];
-      g.beginPath();
-      g.arc(px, y - 1.5, 3.2, 0, Math.PI * 2);
-      g.fill();
-    }
-    g.globalAlpha = 1;
-    g.fillStyle = "rgba(0,0,0,.55)";
-    g.fillRect(0, y + 10, w, 2.5);
-  }
-  g.globalAlpha = 1;
-  const t = tex(c);
-  t.wrapS = THREE.RepeatWrapping;
-  return t;
-}
-
 function boardsTexture() {
   const c = canvas(2048, 64);
   const g = c.getContext("2d");
@@ -181,18 +121,6 @@ function boardsTexture() {
   t.wrapS = THREE.RepeatWrapping;
   t.repeat.set(3, 1);
   return t;
-}
-
-function glowTexture() {
-  const c = canvas(128, 128);
-  const g = c.getContext("2d");
-  const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-  gr.addColorStop(0, "rgba(255,255,255,1)");
-  gr.addColorStop(0.2, "rgba(220,232,255,.55)");
-  gr.addColorStop(1, "rgba(255,255,255,0)");
-  g.fillStyle = gr;
-  g.fillRect(0, 0, 128, 128);
-  return tex(c);
 }
 
 function ballTexture() {
@@ -249,162 +177,7 @@ function numberTexture() {
   return t;
 }
 
-// ---------- דמויות ----------
-
-type Rig = ReturnType<typeof makePlayer>;
-
-function makePlayer(o: { jersey: string; shorts: string; sock: string; hair: string; skin: string; glove?: string; number?: boolean; face?: boolean }) {
-  const M = (color: string, rough = 0.75) => new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: 0 });
-  const skin = M(o.skin, 0.6);
-  const jersey = M(o.jersey, 0.72);
-  const shorts = M(o.shorts, 0.8);
-  const sock = M(o.sock, 0.8);
-  const shoe = M("#0c0c0f", 0.5);
-  const hair = M(o.hair, 0.9);
-  const glove = M(o.glove || o.skin, 0.55);
-  const mesh = (geo: any, mat: any, x = 0, y = 0, z = 0) => {
-    const m = new THREE.Mesh(geo, mat);
-    m.position.set(x, y, z);
-    m.castShadow = true;
-    m.receiveShadow = true;
-    return m;
-  };
-
-  const root = new THREE.Group();
-  const pelvis = new THREE.Group();
-  pelvis.position.y = 0.95;
-  root.add(pelvis);
-
-  const short = mesh(new THREE.CylinderGeometry(0.19, 0.215, 0.28, 18), shorts, 0, -0.03, 0);
-  short.scale.z = 0.78;
-  pelvis.add(short);
-
-  const legs = [-1, 1].map((side) => {
-    const hip = new THREE.Group();
-    hip.position.set(side * 0.105, -0.02, 0);
-    pelvis.add(hip);
-    hip.add(mesh(new THREE.CapsuleGeometry(0.078, 0.31, 6, 14), skin, 0, -0.22, 0));
-    const knee = new THREE.Group();
-    knee.position.y = -0.45;
-    hip.add(knee);
-    knee.add(mesh(new THREE.CapsuleGeometry(0.06, 0.33, 6, 14), sock, 0, -0.22, 0));
-    const band = mesh(new THREE.CylinderGeometry(0.064, 0.064, 0.04, 14), M("#111114", 0.8), 0, -0.2, 0);
-    knee.add(band);
-    const ankle = new THREE.Group();
-    ankle.position.y = -0.44;
-    knee.add(ankle);
-    const foot = mesh(new THREE.CapsuleGeometry(0.05, 0.17, 6, 12), shoe, 0, -0.015, -0.06);
-    foot.rotation.x = Math.PI / 2;
-    ankle.add(foot);
-    return { hip, knee, ankle };
-  });
-
-  const torso = new THREE.Group();
-  torso.position.y = 0.08;
-  pelvis.add(torso);
-  const body = mesh(new THREE.CapsuleGeometry(0.17, 0.36, 8, 18), jersey, 0, 0.3, 0);
-  body.scale.set(1.12, 1, 0.72);
-  torso.add(body);
-  if (o.number) {
-    const plane = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.36, 0.42),
-      new THREE.MeshStandardMaterial({ map: numberTexture(), transparent: true, roughness: 0.9, polygonOffset: true, polygonOffsetFactor: -2 })
-    );
-    plane.position.set(0, 0.34, 0.125);
-    torso.add(plane);
-  }
-
-  const arms = [-1, 1].map((side) => {
-    const sh = new THREE.Group();
-    sh.position.set(side * 0.225, 0.5, 0);
-    torso.add(sh);
-    sh.add(mesh(new THREE.CapsuleGeometry(0.05, 0.2, 6, 12), skin, 0, -0.17, 0));
-    sh.add(mesh(new THREE.CapsuleGeometry(0.06, 0.1, 6, 12), jersey, 0, -0.11, 0));
-    const el = new THREE.Group();
-    el.position.y = -0.34;
-    sh.add(el);
-    el.add(mesh(new THREE.CapsuleGeometry(0.044, 0.2, 6, 12), o.glove ? jersey : skin, 0, -0.16, 0));
-    el.add(mesh(new THREE.SphereGeometry(o.glove ? 0.075 : 0.055, 14, 12), glove, 0, -0.36, 0));
-    return { sh, el };
-  });
-
-  const head = new THREE.Group();
-  head.position.y = 0.76;
-  torso.add(head);
-  torso.add(mesh(new THREE.CylinderGeometry(0.052, 0.06, 0.12, 12), skin, 0, 0.64, 0));
-  const face = mesh(new THREE.SphereGeometry(0.108, 20, 16), skin, 0, 0, -0.025);
-  face.scale.y = 1.1;
-  head.add(face);
-  const hairM = mesh(new THREE.SphereGeometry(0.121, 22, 16), hair, 0, 0.012, 0.022);
-  hairM.scale.set(1, 1.07, 1.02);
-  head.add(hairM);
-  head.add(mesh(new THREE.SphereGeometry(0.026, 8, 8), skin, -0.112, -0.005, -0.005));
-  head.add(mesh(new THREE.SphereGeometry(0.026, 8, 8), skin, 0.112, -0.005, -0.005));
-  if (o.face) {
-    const white = new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.3 });
-    const dark = new THREE.MeshStandardMaterial({ color: "#14100e", roughness: 0.6 });
-    for (const s of [-1, 1]) {
-      head.add(mesh(new THREE.SphereGeometry(0.024, 10, 8), white, s * 0.04, 0.02, -0.118));
-      head.add(mesh(new THREE.SphereGeometry(0.012, 8, 8), dark, s * 0.04, 0.02, -0.14));
-      const brow = mesh(new THREE.BoxGeometry(0.05, 0.01, 0.01), dark, s * 0.04, 0.058, -0.125);
-      brow.rotation.z = s * 0.18;
-      head.add(brow);
-    }
-    head.add(mesh(new THREE.BoxGeometry(0.05, 0.01, 0.01), M("#6b2d22", 0.6), 0, -0.052, -0.12));
-    head.add(mesh(new THREE.SphereGeometry(0.014, 8, 8), skin, 0, -0.005, -0.128));
-  }
-  return { root, pelvis, torso, head, legs, arms };
-}
-
-function resetPose(p: Rig) {
-  p.root.position.y = 0;
-  p.torso.rotation.set(0, 0, 0);
-  p.head.rotation.set(0, 0, 0);
-  p.pelvis.rotation.set(0, 0, 0);
-  for (const l of p.legs) {
-    l.hip.rotation.set(0, 0, 0);
-    l.knee.rotation.set(0, 0, 0);
-    l.ankle.rotation.set(0, 0, 0);
-  }
-  for (const a of p.arms) {
-    a.sh.rotation.set(0, 0, 0);
-    a.el.rotation.set(0, 0, 0);
-  }
-}
-
 // ---------- בניית הסצנה ----------
-
-function bar(a: any, b: any, r: number, mat: any) {
-  const dir = new THREE.Vector3().subVectors(b, a);
-  const len = dir.length();
-  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 12), mat);
-  m.position.copy(a).addScaledVector(dir, 0.5);
-  m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
-  m.castShadow = true;
-  return m;
-}
-
-function netLines(p00: any, p10: any, p01: any, p11: any, nu: number, nv: number, mat: any) {
-  const pos: number[] = [];
-  const at = (u: number, v: number) => {
-    const a = new THREE.Vector3().lerpVectors(p00, p10, u);
-    const b = new THREE.Vector3().lerpVectors(p01, p11, u);
-    return a.lerp(b, v);
-  };
-  for (let i = 0; i <= nu; i++) {
-    const a = at(i / nu, 0);
-    const b = at(i / nu, 1);
-    pos.push(a.x, a.y, a.z, b.x, b.y, b.z);
-  }
-  for (let j = 0; j <= nv; j++) {
-    const a = at(0, j / nv);
-    const b = at(1, j / nv);
-    pos.push(a.x, a.y, a.z, b.x, b.y, b.z);
-  }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
-  return new THREE.LineSegments(g, mat);
-}
 
 export function createFootball3D(
   host: HTMLElement,
@@ -469,7 +242,7 @@ export function createFootball3D(
   scene.add(pitch);
 
   // ----- יציע, שלטים, תאורה -----
-  const standMat = new THREE.MeshBasicMaterial({ map: crowdTexture(11), color: 0xb4b6c0, fog: true });
+  const standMat = new THREE.MeshBasicMaterial({ map: crowdTexture(11, GATE_PALETTE), color: 0xb4b6c0, fog: true });
   standMat.map.repeat.set(3, 1.4);
   const stand = new THREE.Mesh(new THREE.PlaneGeometry(90, 28), standMat);
   stand.position.set(0, 8.2, -20);
@@ -507,6 +280,139 @@ export function createFootball3D(
   flood(-22, 15.4, -23, 40);
   flood(22, 15.4, -23, 40);
   flood(0, 17, -25, 26);
+
+
+  // ----- אווירת יציע סוערת: באנר ענק, דגלים, בלוסים ועשן אדום -----
+  const standPt = (x: number, v: number) => new THREE.Vector3(x, 8.2 + v * 0.814, -20 - v * 0.581);
+  {
+    const bc = canvas(2048, 256);
+    const g = bc.getContext("2d");
+    g.fillStyle = "#b5121c";
+    g.fillRect(0, 0, 2048, 256);
+    for (let i = -4; i < 30; i++) {
+      g.fillStyle = i % 2 ? "#f4efe6" : "#7d0b13";
+      g.beginPath();
+      g.moveTo(i * 90, 256);
+      g.lineTo(i * 90 + 256, 0);
+      g.lineTo(i * 90 + 256 + 45, 0);
+      g.lineTo(i * 90 + 45, 256);
+      g.fill();
+    }
+    g.fillStyle = "#08080a";
+    g.fillRect(0, 0, 2048, 14);
+    g.fillRect(0, 242, 2048, 14);
+    const draw = () => {
+      g.save();
+      g.font = "900 190px Heebo, Arial, sans-serif";
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      g.lineJoin = "round";
+      for (const x of [340, 1020, 1700]) {
+        g.lineWidth = 22;
+        g.strokeStyle = "#f4efe6";
+        g.strokeText("שער 9", x, 134);
+        g.fillStyle = "#0a0a0c";
+        g.fillText("שער 9", x, 134);
+      }
+      g.restore();
+    };
+    draw();
+    const bt = tex(bc);
+    try {
+      document.fonts?.load("900 100px Heebo").then(() => {
+        draw();
+        bt.needsUpdate = true;
+      });
+    } catch {}
+    const banner = new THREE.Mesh(new THREE.PlaneGeometry(46, 5.2), new THREE.MeshBasicMaterial({ map: bt, color: 0xd8d8d8 }));
+    const bp = standPt(0, -3.9);
+    banner.position.set(0, bp.y + 0.1, bp.z + 0.14);
+    banner.rotation.x = -0.62;
+    scene.add(banner);
+  }
+  const flagTexs = [["#d3202c", "#d3202c"], ["#f4efe6", "#d3202c"], ["#d3202c", "#f4efe6"]].map(([a, b], k) => {
+    const c = canvas(64, 40);
+    const g = c.getContext("2d");
+    g.fillStyle = a;
+    g.fillRect(0, 0, 64, 40);
+    if (k > 0) {
+      g.fillStyle = b;
+      for (let i = 0; i < 4; i++) g.fillRect(0, i * 10 + (k === 1 ? 5 : 0), 64, 5);
+    }
+    return tex(c);
+  });
+  const flags: any[] = [];
+  {
+    const rf = rng(77);
+    const poleMat = new THREE.MeshBasicMaterial({ color: 0x15161b });
+    for (let i = 0; i < 52; i++) {
+      const base = standPt((rf() - 0.5) * 66, -2 + rf() * 11);
+      const grp = new THREE.Group();
+      grp.position.set(base.x, base.y + 2.7, base.z + 0.3);
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 3.4, 5), poleMat);
+      pole.position.y = -1.5;
+      grp.add(pole);
+      const fl = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.15, 0.72),
+        new THREE.MeshBasicMaterial({ map: flagTexs[Math.floor(rf() * 3)], side: THREE.DoubleSide, color: 0xdcdcdc })
+      );
+      fl.position.set(0.58, 0.05, 0);
+      grp.add(fl);
+      grp.userData = { ph: rf() * 6, sp: 1.6 + rf() * 1.4 };
+      scene.add(grp);
+      flags.push(grp);
+    }
+  }
+  const flareTex = (() => {
+    const c = canvas(128, 128);
+    const g = c.getContext("2d");
+    const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gr.addColorStop(0, "rgba(255,240,230,1)");
+    gr.addColorStop(0.18, "rgba(255,80,40,.9)");
+    gr.addColorStop(0.5, "rgba(230,30,20,.28)");
+    gr.addColorStop(1, "rgba(200,20,20,0)");
+    g.fillStyle = gr;
+    g.fillRect(0, 0, 128, 128);
+    return tex(c);
+  })();
+  const smokeTex = (() => {
+    const c = canvas(128, 128);
+    const g = c.getContext("2d");
+    const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gr.addColorStop(0, "rgba(255,255,255,.9)");
+    gr.addColorStop(1, "rgba(255,255,255,0)");
+    g.fillStyle = gr;
+    g.fillRect(0, 0, 128, 128);
+    return tex(c);
+  })();
+  const flareSpots = [[-24, -3.4], [-13, -2.2], [-4, -3.2], [7, -2.4], [16, -3.3], [26, -2.5], [-31, 0.2], [32, 0.4]].map(([x, v]) => standPt(x, v));
+  const flares = flareSpots.map((p) => {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: flareTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, fog: false }));
+    sp.position.set(p.x, p.y + 0.6, p.z + 0.6);
+    scene.add(sp);
+    return sp;
+  });
+  const smokes = Array.from({ length: 22 }, (_, i) => {
+    const base = flareSpots[i % flareSpots.length];
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: smokeTex, color: i % 2 ? 0xc02530 : 0x8a1a22, transparent: true, depthWrite: false, opacity: 0, fog: false }));
+    sp.userData = { base, i };
+    scene.add(sp);
+    return sp;
+  });
+  // קרני זרקורים
+  for (const fx of [-22, 22]) {
+    const from = new THREE.Vector3(fx, 15.4, -23);
+    const to = new THREE.Vector3(fx * 0.1, 0, 6);
+    const dir = new THREE.Vector3().subVectors(to, from);
+    const len = dir.length();
+    const cone = new THREE.Mesh(
+      new THREE.ConeGeometry(11, len, 28, 1, true),
+      new THREE.MeshBasicMaterial({ color: 0xdbe8ff, transparent: true, opacity: 0.035, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false })
+    );
+    cone.position.copy(from).addScaledVector(dir, 0.5);
+    cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), dir.normalize());
+    scene.add(cone);
+  }
 
   // הבזקי מצלמות בקהל
   const FL = 70;
@@ -569,7 +475,7 @@ export function createFootball3D(
   scene.add(goal);
 
   // ----- דמויות וכדור -----
-  const striker = makePlayer({ jersey: "#FF4A1C", shorts: "#111114", sock: "#FF4A1C", hair: "#1a1411", skin: "#E6C3A3", number: true });
+  const striker = makePlayer({ jersey: "#FF4A1C", shorts: "#111114", sock: "#FF4A1C", hair: "#1a1411", skin: "#E6C3A3", number: true, numberTex: numberTexture() });
   scene.add(striker.root);
   const keeper = makePlayer({ jersey: "#8fbca1", shorts: "#17171c", sock: "#17171c", hair: "#17120f", skin: "#E6C3A3", glove: "#ff6a3d", face: true });
   const keeperHolder = new THREE.Group();
@@ -600,8 +506,8 @@ export function createFootball3D(
   let target = TARGETS.tl;
   let targetId: CornerId = "tl";
   let punctured = false;
-  const A = V(-1.8, 0, 13.0);
-  const B = V(-0.12, 0, 11.55);
+  const A = V(-1.5, 0, 13.6);
+  const B = V(-0.12, 0, 11.95);
   let sway0 = 0;
 
   const project = (x: number, y: number, z: number) => {
@@ -665,6 +571,25 @@ export function createFootball3D(
       flGeo.attributes.color.needsUpdate = true;
     }
 
+    // יציע: דגלים מתנופפים, בלוסים מהבהבים ועשן אדום עולה
+    for (const fg of flags) {
+      const d = fg.userData;
+      fg.rotation.y = Math.sin(now * d.sp + d.ph) * 0.55;
+      fg.rotation.z = Math.sin(now * d.sp * 0.7 + d.ph) * 0.1;
+    }
+    flares.forEach((f, i) => {
+      const k = 2.6 + Math.sin(now * 17 + i * 3) * 0.5 + Math.sin(now * 5 + i) * 0.4;
+      f.scale.set(k, k, 1);
+    });
+    for (const sm of smokes) {
+      const d = sm.userData;
+      const ph = (now * 0.11 + d.i * 0.173) % 1;
+      sm.position.set(d.base.x + Math.sin(d.i * 2 + now * 0.2) * 1.4 + ph * 2.5, d.base.y + 0.6 + ph * 7, d.base.z + 1 + ph * 0.8);
+      const sz = 2.2 + ph * 7.5;
+      sm.scale.set(sz, sz, 1);
+      sm.material.opacity = 0.34 * (1 - ph) * Math.min(1, ph * 6);
+    }
+
     resetPose(striker);
     resetPose(keeper);
     const camPos = CAM.clone();
@@ -693,17 +618,6 @@ export function createFootball3D(
     const sp = striker.root;
     let ballPos = null as any;
 
-    // מחזור הליכה: p במחזורים. מחזיר זוויות ירך/ברך/קרסול לרגל אחת
-    const gait = (p: number, amp: number) => {
-      const w = Math.PI * 2 * p;
-      const c = Math.cos(w);
-      const sw = Math.max(0, Math.sin(w - Math.PI));
-      const hip = (0.52 * c + 0.1) * amp;
-      const knee = -(0.28 * Math.max(0, Math.sin(w)) + 1.6 * Math.pow(sw, 1.15)) * amp - 0.08;
-      const ankle = sw > 0 ? -(hip + knee) * 0.5 - 0.35 * sw : -(hip + knee) * 0.85;
-      return { hip, knee, ankle };
-    };
-
     if (phase === "pick") {
       sp.position.copy(A);
       sp.rotation.y = 0;
@@ -717,12 +631,12 @@ export function createFootball3D(
       camPos.x += Math.sin(now * 0.4) * 0.05;
     } else if (phase === "run") {
       const u = clamp(t / RUN_T);
-      const e = easeInOut(u);
+      const e = u;
       sp.position.set(lerp(A.x, B.x, e), 0, lerp(A.z, B.z, e));
       const yaw = Math.atan2(-(B.x - A.x), -(B.z - A.z));
-      sp.rotation.y = yaw * (1 - easeIn(clamp((u - 0.5) / 0.5)));
-      const amp = clamp(Math.sin(Math.PI * u) * 1.25 + 0.3, 0, 1);
-      const p = t * 1.75;
+      sp.rotation.y = yaw * (1 - easeIn(clamp((u - 0.4) / 0.6)));
+      const amp = clamp(0.55 + u * 1.2, 0, 1);
+      const p = 1.75 * (t - RUN_T) + 2.05; // נגמר בדיוק כשהשמאלית נטועה והימנית מתחילה לחבוט
       const g0 = gait(p, amp);
       const g1 = gait(p + 0.5, amp);
       const L = striker.legs[0];
@@ -749,7 +663,7 @@ export function createFootball3D(
     } else {
       // ---- בעיטה ----
       const kt = t;
-      sp.position.copy(B);
+      sp.position.set(B.x, 0, B.z - 0.3 * easeOut(clamp(kt / 0.5)));
       sp.rotation.y = 0;
       const R = striker.legs[1];
       const L = striker.legs[0];
@@ -760,10 +674,10 @@ export function createFootball3D(
       let hop = 0;
       if (kt < 0.2) {
         // כניסה לנעילה: הרגל נשלפת לאחור, הגוף מתאסף
-        const s = easeOut(kt / 0.2);
-        hip = -0.75 * s;
-        knee = -1.55 * s;
-        lean = lerp(-0.1, 0.04, s);
+        const s = easeInOut(kt / 0.2);
+        hip = lerp(-0.39, -0.75, s);
+        knee = lerp(-0.49, -1.55, s);
+        lean = lerp(-0.2, 0.04, s);
         twist = -0.28 * s;
       } else if (kt < KL + 0.02) {
         // החבטה: הירך מזנקת קדימה, הברך נפתחת רגע לפני המגע
@@ -788,11 +702,13 @@ export function createFootball3D(
         twist = lerp(0.2, 0, s);
       }
       sp.position.y = hop;
+      sp.position.z = B.z - 0.3 * easeOut(clamp(kt / 0.5));
       R.hip.rotation.x = hip;
       R.knee.rotation.x = knee;
       R.ankle.rotation.x = -(hip + knee) * 0.3 + (kt > KL ? -0.3 : 0.2);
-      L.hip.rotation.x = 0.12;
-      L.knee.rotation.x = -0.2;
+      const lb = easeInOut(clamp(kt / 0.15));
+      L.hip.rotation.x = lerp(0.59, 0.12, lb);
+      L.knee.rotation.x = lerp(-0.17, -0.2, lb);
       L.ankle.rotation.x = hop > 0 ? -0.5 : 0;
       striker.torso.rotation.x = lean;
       striker.pelvis.rotation.y = twist * 0.6;
@@ -800,12 +716,12 @@ export function createFootball3D(
       striker.head.rotation.y = -twist * 0.4;
       // ידיים: מאזנות, שמאל קדימה-החוצה וימין אחורה
       const ks = clamp(kt / 0.3);
-      striker.arms[0].sh.rotation.x = lerp(0.1, 0.55, ks);
-      striker.arms[1].sh.rotation.x = lerp(-0.1, -0.5, ks);
-      striker.arms[0].sh.rotation.z = lerp(0, -1.0, ks);
-      striker.arms[1].sh.rotation.z = lerp(0, 0.85, ks);
-      striker.arms[0].el.rotation.x = 0.4;
-      striker.arms[1].el.rotation.x = 0.3;
+      striker.arms[0].sh.rotation.x = lerp(0.57, 0.55, ks);
+      striker.arms[1].sh.rotation.x = lerp(-0.57, -0.5, ks);
+      striker.arms[0].sh.rotation.z = lerp(0.08, -1.0, ks);
+      striker.arms[1].sh.rotation.z = lerp(-0.08, 0.85, ks);
+      striker.arms[0].el.rotation.x = lerp(1.2, 0.4, ks);
+      striker.arms[1].el.rotation.x = lerp(1.1, 0.3, ks);
 
       // פאדיחה: שתי הידיים על הראש, ראש מורכן, כתפיים רועדות
       const fp = easeInOut(clamp((kt - 1.0) / 0.45));

@@ -191,7 +191,7 @@ export default function TableTennis({ onMore, onHire }: GameProps) {
 
         {!thrown && (
           <div className="pointer-events-none absolute end-2.5 top-2.5 z-10 border-2 border-ink bg-paper px-2.5 py-1 text-sm font-bold">
-            החליקו למעלה כדי להגיש
+            החליקו כדי להגיש
           </div>
         )}
         {!thrown && (
@@ -220,7 +220,7 @@ export default function TableTennis({ onMore, onHire }: GameProps) {
       </div>
 
       <p className="mt-4 text-center text-sm text-ink/70" aria-live="polite">
-        {phase === "ready" ? "מחבט ביד אחת, שולחן ביד השנייה. החליקו כלפי מעלה על השחקן כדי להגיש." : "..."}
+        {phase === "ready" ? "החליקו כדי להגיש." : "..."}
       </p>
 
       {phase === "done" && (

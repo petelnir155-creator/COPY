@@ -3,6 +3,7 @@ import { site } from "../data/site";
 const links = [
   { href: "#work", label: "עבודות" },
   { href: "#brands", label: "מותגים" },
+  { href: "#/cv", label: "קורות" },
   { href: "#contact", label: "דברו איתי" },
 ];
 
@@ -16,7 +17,7 @@ export default function Nav() {
         <a href="#top" className="font-serif text-xl font-black leading-none">
           {site.name}
         </a>
-        <ul className="flex items-center gap-5 text-sm font-medium sm:gap-8 sm:text-base">
+        <ul className="flex items-center gap-4 text-sm font-medium sm:gap-8 sm:text-base">
           {links.map((l) => (
             <li key={l.href}>
               <a href={l.href} className="link-draw pb-0.5">

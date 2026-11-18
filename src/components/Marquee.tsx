@@ -27,7 +27,14 @@ export default function Marquee() {
             className="flex items-center gap-8 ps-8"
           >
             {b.logo ? (
-              <img src={b.logo} alt={b.name} loading="lazy" className="h-9 w-auto opacity-80 grayscale" />
+              // אפור כברירת מחדל (אחיד ושקט), צבע בהובר. להחזרת צבע תמיד: למחוק grayscale.
+              <img
+                src={b.logo}
+                alt={i < brands.length ? b.name : ""}
+                loading="lazy"
+                decoding="async"
+                className="h-14 w-auto grayscale transition duration-300 hover:grayscale-0 sm:h-16"
+              />
             ) : (
               <span className="whitespace-nowrap font-serif text-4xl font-black sm:text-5xl">{b.name}</span>
             )}

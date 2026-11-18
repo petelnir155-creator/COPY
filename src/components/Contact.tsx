@@ -50,6 +50,12 @@ export default function Contact() {
         <p className="mt-10 text-sm text-paper/50">
           © {new Date().getFullYear()} {site.name}
         </p>
+        <p className="mt-2 text-xs text-paper/40">
+          הבוס מתקרב? המקש מעל Tab, או{" "}
+          <a href="#/news" className="link-draw pb-0.5">
+            לחצו כאן
+          </a>
+        </p>
       </div>
     </section>
   );

@@ -8,6 +8,7 @@ const links = [
   { href: "#work", label: "עבודות" },
   { href: "#brands", label: "מותגים" },
   { href: "#/cv", label: "קורות" },
+  { href: "#/games", label: "משחקונים" },
   { href: "#contact", label: "דברו איתי" },
 ];
 
@@ -52,7 +53,7 @@ export default function Nav() {
           </a>
 
           {/* דסקטופ */}
-          <ul className="hidden items-center gap-8 text-base font-medium sm:flex">
+          <ul className="hidden items-center gap-6 text-base font-medium md:flex lg:gap-8">
             {links.map((l) => (
               <li key={l.href}>
                 <a href={l.href} className="link-draw pb-0.5">
@@ -60,6 +61,28 @@ export default function Nav() {
                 </a>
               </li>
             ))}
+            {/* הלשונית עם השם הארוך בכוונה: נגללת בתוך מסגרת קבועה */}
+            <li>
+              <a
+                href="#/news"
+                title={site.coverTabLabel}
+                className="block w-44 border-2 border-ink px-3 py-1 text-sm transition hover:bg-ink hover:text-paper lg:w-64"
+              >
+                <span className="block overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_10%,#000_90%,transparent)]">
+                  <span
+                    dir="ltr"
+                    className="flex w-max animate-marquee hover:[animation-play-state:paused] motion-reduce:animate-none"
+                    style={{ animationDuration: "18s" }}
+                  >
+                    {[0, 1].map((i) => (
+                      <span key={i} dir="rtl" aria-hidden={i === 1} className="whitespace-nowrap pe-10">
+                        {site.coverTabLabel}
+                      </span>
+                    ))}
+                  </span>
+                </span>
+              </a>
+            </li>
           </ul>
 
           {/* מובייל */}
@@ -69,7 +92,7 @@ export default function Nav() {
             onClick={() => setOpen(true)}
             aria-label="פתיחת תפריט"
             aria-expanded={open}
-            className="flex items-center gap-2 border-2 border-ink px-3 py-1.5 text-sm font-medium transition active:scale-95 sm:hidden"
+            className="flex items-center gap-2 border-2 border-ink px-3 py-1.5 text-sm font-medium transition active:scale-95 md:hidden"
           >
             תפריט
             <span aria-hidden className="flex flex-col gap-[3px]">
@@ -86,7 +109,7 @@ export default function Nav() {
         {open && (
           <motion.div
             key="overlay"
-            className="fixed inset-0 z-50 bg-ink/60 sm:hidden"
+            className="fixed inset-0 z-50 bg-ink/60 md:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -100,7 +123,7 @@ export default function Nav() {
             role="dialog"
             aria-modal="true"
             aria-label="תפריט"
-            className="fixed inset-y-0 start-0 z-50 flex w-[84%] max-w-sm flex-col overflow-y-auto border-e-2 border-ink bg-paper px-6 pb-8 pt-5 sm:hidden"
+            className="fixed inset-y-0 start-0 z-50 flex w-[84%] max-w-sm flex-col overflow-y-auto border-e-2 border-ink bg-paper px-6 pb-8 pt-5 md:hidden"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
@@ -148,6 +171,16 @@ export default function Nav() {
                   )}
                 </motion.li>
               ))}
+              <motion.li
+                initial={{ opacity: 0, x: 24 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.08 + links.length * 0.05, duration: 0.35, ease: [0.2, 0.7, 0.2, 1] }}
+                className="border-t-2 border-ink pt-5 font-sans text-lg font-medium leading-snug"
+              >
+                <a href="#/news" onClick={close} className="block">
+                  {site.coverTabLabel} ↗
+                </a>
+              </motion.li>
             </ul>
 
             <div className="mt-auto space-y-4 pt-10">

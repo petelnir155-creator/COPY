@@ -10,15 +10,19 @@ import Modal from "./components/Modal";
 import ElevatorMusic from "./components/ElevatorMusic";
 import NewsPage from "./components/NewsPage";
 import CvPage from "./components/CvPage";
+import GamesPage from "./components/GamesPage";
 
 const NEWS_HASH = "#/news";
 const CV_HASH = "#/cv";
+const GAMES_HASH = "#/games";
 
 export default function App() {
   const [open, setOpen] = useState<Project | null>(null);
   const [hash, setHash] = useState(() => window.location.hash);
   const isNews = hash === NEWS_HASH;
   const isCv = hash === CV_HASH;
+  const isGames = hash === GAMES_HASH;
+  const isMain = !isNews && !isCv && !isGames;
 
   useEffect(() => {
     const onHash = () => setHash(window.location.hash);
@@ -36,10 +40,17 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (isNews || isCv) setOpen(null);
+    if (!isMain) setOpen(null);
     if (isNews) window.dispatchEvent(new Event("site:video-start")); // משתיק מוזיקה
-    window.scrollTo(0, 0);
-  }, [isNews, isCv]);
+
+    const id = hash.startsWith("#/") ? "" : hash.slice(1);
+    if (isMain && id && id !== "top") {
+      // חזרה לאתר הראשי עם עוגן (למשל #contact מהמשחקונים): מחכים לרינדור וגוללים
+      requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView());
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [hash, isMain, isNews]);
 
   // דף הכיסוי: בלי מוזיקה ובלי שום דבר אחר
   if (isNews) return <NewsPage />;
@@ -48,6 +59,8 @@ export default function App() {
     <>
       {isCv ? (
         <CvPage />
+      ) : isGames ? (
+        <GamesPage />
       ) : (
         <>
           <a
@@ -65,7 +78,7 @@ export default function App() {
           </main>
         </>
       )}
-      {/* מוזיקת המעליות ממשיכה לנגן גם בעמוד הקורות */}
+      {/* מוזיקת המעליות ממשיכה לנגן גם בעמוד הקורות ובמשחקונים */}
       <ElevatorMusic />
       <AnimatePresence>
         {open && <Modal key={open.id} project={open} onClose={() => setOpen(null)} />}

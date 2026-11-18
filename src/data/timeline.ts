@@ -25,8 +25,7 @@ export const timeline: Moment[] = [
   {
     when: "2019",
     text: "התחתנתי עם אוד. עברו מעל 7 שנים אבל מתנה היא לא מילה גסה.",
-    // TODO: להדביק כאן את קישור ה-Bit
-    link: { word: "מתנה", href: "" },
+    link: { word: "מתנה", href: "https://www.bitpay.co.il/app/share-info?i=NAvxcloI&j=true" },
   },
   { when: "2020", text: "מגפה עולמית." },
   { when: "2021", text: "דין נולדה." },

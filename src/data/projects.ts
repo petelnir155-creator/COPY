@@ -18,6 +18,7 @@ export type Category = "creative" | "social";
 export type Video =
   | { provider: "youtube" | "vimeo"; id: string; label?: string }
   | { provider: "link"; url: string; label?: string }
+  | { provider: "tiktok"; id: string; url: string; label?: string }
   | { provider: "file"; src: string; poster?: string; label?: string };
 
 export type Img = { src: string; caption?: string };
@@ -38,13 +39,21 @@ const yt = (id: string, label?: string): Video => ({ provider: "youtube", id, la
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const vimeo = (id: string, label?: string): Video => ({ provider: "vimeo", id, label });
 const link = (url: string, label?: string): Video => ({ provider: "link", url, label });
+// טיקטוק: מדביקים את הלינק המלא, המזהה נשלף ממנו. tt("https://www.tiktok.com/@user/video/123...", "תווית")
+const tt = (url: string, label?: string): Video => ({
+  provider: "tiktok",
+  id: url.match(/video\/(\d+)/)?.[1] ?? "",
+  url,
+  label,
+});
 const file = (src: string, poster?: string, label?: string): Video => ({ provider: "file", src, poster, label });
 // מספר תמונות ממוספרות בתיקייה: gallery("vanish-posts", 6) => 01.webp ... 06.webp
 const img = (src: string, caption?: string): Img => ({ src, caption });
 const gallery = (id: string, n: number): Img[] =>
   Array.from({ length: n }, (_, i) => img(`/work/${id}/${String(i + 1).padStart(2, "0")}.webp`));
 const cv = (id: string) => `/work/${id}/cover.webp`;
-void vimeo; // זמין לשימוש עתידי
+void vimeo;
+void tt; // זמין לשימוש עתידי
 
 export const categories: { key: Category; label: string }[] = [
   { key: "creative", label: "קריאייטיב" },
@@ -182,6 +191,58 @@ export const projects: Project[] = [
 
   // ───────────── סושיאל ─────────────
   {
+    id: "bezeq-international",
+    title: "בזק בינלאומי: פוסטים",
+    brand: "בזק בינלאומי",
+    category: "social",
+    cover: cv("bezeq-international"),
+    images: gallery("bezeq-international", 8),
+  },
+  {
+    id: "pelephone-posts",
+    title: "פלאפון: פוסטים",
+    brand: "פלאפון",
+    category: "social",
+    cover: cv("pelephone-posts"),
+    images: gallery("pelephone-posts", 11),
+  },
+  {
+    id: "pelephone-tiktok",
+    title: "חנן בן ארי ואוראל צברי",
+    brand: "פלאפון",
+    category: "social",
+    // TODO: לינק לטיקטוק
+    videos: [],
+  },
+  {
+    id: "durex-posts",
+    title: "דורקס: פוסטים",
+    brand: "דורקס",
+    category: "social",
+    cover: cv("durex-posts"),
+    images: gallery("durex-posts", 10),
+  },
+  {
+    id: "durex-tiktok",
+    title: "דורקס בטיקטוק",
+    brand: "דורקס",
+    category: "social",
+    videos: [
+      tt("https://www.tiktok.com/@durexil/video/7236363116261444866"),
+      tt("https://www.tiktok.com/@durexil/video/7226731627114794241"),
+      tt("https://www.tiktok.com/@durexil/video/7179978821473520897"),
+      tt("https://www.tiktok.com/@durexil/video/7246008550814764289"),
+    ],
+  },
+  {
+    id: "mahsanei-hashmal-posts",
+    title: "מחסני חשמל: פוסטים",
+    brand: "מחסני חשמל",
+    category: "social",
+    cover: cv("mahsanei-hashmal"),
+    images: gallery("mahsanei-hashmal", 7),
+  },
+  {
     id: "mega-crispy",
     title: "מגה קריספי צ'יקן חריף",
     brand: "מקדונלד'ס",
@@ -203,79 +264,12 @@ export const projects: Project[] = [
     videos: [yt("13YX4tE38Ek")],
   },
   {
-    id: "nature-museum-home",
-    title: "מוזיאון הטבע בבית",
-    brand: "מוזיאון הטבע",
-    category: "social",
-    cover: cv("nature-museum-home"),
-    blurb:
-      "בסגר הראשון של הקורונה, רצינו לתת לאנשים סיור במוזיאון - גם מהבית. אז עשינו הפקת צילומים לכל המוזיאון, ויצרנו עמוד אינסטגרם באווירת סיור, עם מידע על כל פרט ומעבר בין כל קטגוריה במוזיאון.",
-    videos: [file("/work/nature-museum-home/tour.mp4", "/work/nature-museum-home/poster.webp", "הסיור")],
-  },
-  {
-    id: "durex-tiktok",
-    title: "דורקס בטיקטוק",
-    brand: "דורקס",
-    category: "social",
-    parts: ["טיפים", "מזלות 2", "מזלות 3"],
-    // TODO: לינקים לטיקטוקים: link("https://www.tiktok.com/...", "טיפים")
-    videos: [],
-  },
-  {
-    id: "pelephone-tiktok",
-    title: "חנן בן ארי ואוראל צברי",
-    brand: "פלאפון",
-    category: "social",
-    // TODO: לינק לטיקטוק
-    videos: [],
-  },
-  {
-    id: "vanish-posts",
-    title: "וניש: פוסטים",
-    brand: "וניש",
-    category: "social",
-    cover: cv("vanish-posts"),
-    images: gallery("vanish-posts", 6),
-  },
-  {
-    id: "nature-museum-posts",
-    title: "מוזיאון הטבע: פוסטים",
-    brand: "מוזיאון הטבע",
-    category: "social",
-    cover: cv("nature-museum-posts"),
-    images: gallery("nature-museum-posts", 5),
-  },
-  {
     id: "shufersal-travel",
     title: "שופרסל טרוול: פוסטים",
     brand: "שופרסל טרוול",
     category: "social",
     cover: cv("shufersal-travel"),
     images: gallery("shufersal-travel", 6),
-  },
-  {
-    id: "bezeq-international",
-    title: "בזק בינלאומי: פוסטים",
-    brand: "בזק בינלאומי",
-    category: "social",
-    cover: cv("bezeq-international"),
-    images: gallery("bezeq-international", 8),
-  },
-  {
-    id: "pelephone-posts",
-    title: "פלאפון: פוסטים",
-    brand: "פלאפון",
-    category: "social",
-    cover: cv("pelephone-posts"),
-    images: gallery("pelephone-posts", 11),
-  },
-  {
-    id: "durex-posts",
-    title: "דורקס: פוסטים",
-    brand: "דורקס",
-    category: "social",
-    cover: cv("durex-posts"),
-    images: gallery("durex-posts", 10),
   },
   {
     id: "fiat-posts",
@@ -286,20 +280,38 @@ export const projects: Project[] = [
     images: gallery("fiat", 7),
   },
   {
-    id: "mahsanei-hashmal-posts",
-    title: "מחסני חשמל: פוסטים",
-    brand: "מחסני חשמל",
-    category: "social",
-    cover: cv("mahsanei-hashmal"),
-    images: gallery("mahsanei-hashmal", 7),
-  },
-  {
     id: "eldan-post",
     title: "אלדן: פוסט",
     brand: "אלדן",
     category: "social",
     cover: cv("eldan"),
     images: gallery("eldan", 1),
+  },
+  {
+    id: "vanish-posts",
+    title: "וניש: פוסטים",
+    brand: "וניש",
+    category: "social",
+    cover: cv("vanish-posts"),
+    images: gallery("vanish-posts", 6),
+  },
+  {
+    id: "nature-museum-home",
+    title: "מוזיאון הטבע בבית",
+    brand: "מוזיאון הטבע",
+    category: "social",
+    cover: cv("nature-museum-home"),
+    blurb:
+      "בסגר הראשון של הקורונה, רצינו לתת לאנשים סיור במוזיאון - גם מהבית. אז עשינו הפקת צילומים לכל המוזיאון, ויצרנו עמוד אינסטגרם באווירת סיור, עם מידע על כל פרט ומעבר בין כל קטגוריה במוזיאון.",
+    videos: [file("/work/nature-museum-home/tour.mp4", "/work/nature-museum-home/poster.webp", "הסיור")],
+  },
+  {
+    id: "nature-museum-posts",
+    title: "מוזיאון הטבע: פוסטים",
+    brand: "מוזיאון הטבע",
+    category: "social",
+    cover: cv("nature-museum-posts"),
+    images: gallery("nature-museum-posts", 5),
   },
 ];
 

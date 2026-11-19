@@ -71,7 +71,7 @@ export default function Marquee() {
       </h2>
 
       {/* העטיפה ב-ltr קריטית: בדף RTL מסלול רחב נצמד לצד ימין, והאנימציה שמזיזה שמאלה חושפת רווח ריק */}
-      <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-6 sm:space-y-9">
         <Row items={rowA} offset={0} />
         <Row items={rowB} reverse offset={0} />
       </div>

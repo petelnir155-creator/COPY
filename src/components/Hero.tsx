@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { site } from "../data/site";
 
@@ -9,6 +9,42 @@ export default function Hero() {
   const [order, setOrder] = useState<number[]>(site.roles.map((_, i) => i));
   // אם התמונה עוד לא הועלתה (או נכשלה), כל מה שקשור לדין פשוט נעלם והמבנה לא נשבר
   const [photoOk, setPhotoOk] = useState(true);
+
+  // חץ המובייל: נמדד מהמיקום האמיתי של "אבא של דין" ושל התמונה, כדי שיצביע אליה גם כשהסדר מתחלף
+  const gridRef = useRef<HTMLDivElement>(null);
+  const deanTextRef = useRef<HTMLSpanElement>(null);
+  const photoRef = useRef<HTMLElement>(null);
+  const [arrow, setArrow] = useState<{ d: string; head: string; w: number; h: number } | null>(null);
+
+  const measureArrow = useCallback(() => {
+    const g = gridRef.current?.getBoundingClientRect();
+    const t = deanTextRef.current?.getBoundingClientRect();
+    const f = photoRef.current?.getBoundingClientRect();
+    if (!g || !t || !f || window.innerWidth >= 768) return setArrow(null);
+    const r = (n: number) => Math.round(n);
+    const x0 = t.left - g.left - 10;
+    const y0 = t.top - g.top + t.height / 2 + 4;
+    const px = f.left - g.left - 8;
+    const py = f.top - g.top + f.height * 0.18;
+    const lx = Math.max(6, Math.min(14, px - 34));
+    if (py < y0 + 40) return setArrow(null);
+    const d =
+      `M${r(x0)} ${r(y0)} C${r(x0 - 40)} ${r(y0 - 8)} ${lx} ${r(y0 + 8)} ${lx} ${r(y0 + 56)} ` +
+      `L${lx} ${r(py - 46)} C${lx} ${r(py - 8)} ${r(px - 40)} ${r(py)} ${r(px)} ${r(py)}`;
+    const head = `M${r(px - 13)} ${r(py - 9)} L${r(px)} ${r(py)} L${r(px - 13)} ${r(py + 9)}`;
+    setArrow({ d, head, w: r(g.width), h: r(g.height) });
+  }, []);
+
+  useEffect(() => {
+    // אחרי כל החלפת סדר מחכים שהאנימציה תסתיים, ואז מודדים שוב
+    const ts = [0, 400, 900].map((ms) => setTimeout(measureArrow, ms));
+    window.addEventListener("resize", measureArrow);
+    document.fonts?.ready.then(measureArrow);
+    return () => {
+      ts.forEach(clearTimeout);
+      window.removeEventListener("resize", measureArrow);
+    };
+  }, [order, photoOk, measureArrow]);
 
   const shuffle = () => setOrder((o) => [o[o.length - 1], ...o.slice(0, -1)]);
 
@@ -45,7 +81,8 @@ export default function Hero() {
       </h1>
 
       <div
-        className={`mt-8 grid items-center gap-8 ${
+        ref={gridRef}
+        className={`relative mt-8 grid items-center gap-8 ${
           photoOk ? "md:grid-cols-[minmax(0,1fr)_15rem]" : ""
         }`}
       >
@@ -61,7 +98,7 @@ export default function Hero() {
                 <span className="w-6 font-sans text-sm font-medium tabular-nums text-accent">
                   0{pos + 1}
                 </span>
-                <span>{site.roles[roleIdx]}</span>
+                <span ref={roleIdx === site.deanRoleIndex ? deanTextRef : undefined}>{site.roles[roleIdx]}</span>
 
                 {/* החץ שייך ל"אבא של דין", אז הוא זז איתו כשהסדר מתחלף ומצויר מחדש */}
                 {roleIdx === site.deanRoleIndex && photoOk && (
@@ -99,35 +136,6 @@ export default function Hero() {
                   </motion.span>
                 )}
 
-                {/* במובייל התמונה מתחת לרשימה, אז החץ מתעקל כלפי מטה אליה */}
-                {roleIdx === site.deanRoleIndex && photoOk && (
-                  <svg
-                    key={`m${pos}`}
-                    aria-hidden
-                    className="h-14 w-14 flex-none self-end text-ink md:hidden"
-                    viewBox="0 0 60 60"
-                    fill="none"
-                  >
-                    <motion.path
-                      d="M8 6 C 4 30, 20 44, 44 50"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      initial={reduce ? undefined : ({ pathLength: 0 } as never)}
-                      animate={{ pathLength: 1 } as never}
-                      transition={{ duration: 0.7, delay: 0.35, ease }}
-                    />
-                    <motion.path
-                      d="M44 50 L 30 52 M44 50 L 38 38"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      initial={reduce ? undefined : ({ pathLength: 0 } as never)}
-                      animate={{ pathLength: 1 } as never}
-                      transition={{ duration: 0.3, delay: 0.95, ease }}
-                    />
-                  </svg>
-                )}
               </motion.li>
             ))}
           </ol>
@@ -144,6 +152,7 @@ export default function Hero() {
 
         {photoOk && (
           <motion.figure
+            ref={photoRef}
             initial={{ opacity: 0, scale: 0.92, rotate: -6 }}
             animate={{ opacity: 1, scale: 1, rotate: -2 }}
             transition={{ duration: 0.7, delay: 0.5, ease }}
@@ -159,6 +168,40 @@ export default function Hero() {
               className="aspect-[3/4] w-full object-cover"
             />
           </motion.figure>
+        )}
+
+        {/* חץ מובייל בלבד: יוצא מ"אבא של דין", יורד בשוליים ונכנס אל התמונה */}
+        {arrow && photoOk && (
+          <svg
+            aria-hidden
+            width={arrow.w}
+            height={arrow.h}
+            className="pointer-events-none absolute start-0 top-0 overflow-visible text-ink md:hidden"
+            style={{ left: 0 }}
+            fill="none"
+          >
+            <motion.path
+              key={`a${order.join("")}`}
+              d={arrow.d}
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              initial={reduce ? undefined : ({ pathLength: 0 } as never)}
+              animate={{ pathLength: 1 } as never}
+              transition={{ duration: 1, delay: 0.5, ease }}
+            />
+            <motion.path
+              key={`h${order.join("")}`}
+              d={arrow.head}
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={reduce ? undefined : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2, delay: 1.4 }}
+            />
+          </svg>
         )}
       </div>
 

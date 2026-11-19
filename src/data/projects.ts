@@ -146,8 +146,13 @@ export const projects: Project[] = [
     title: "עיגול לטובה",
     category: "creative",
     cover: cv("igul-letova"),
-    // TODO: להוסיף הסבר קצר לכל מודעה: img("/work/igul-letova/01.webp", "ההסבר")
-    images: gallery("igul-letova", 5),
+    images: [
+      img("/work/igul-letova/01.webp", "הכסף הקטן שלכם יכול לעזור לארגון \"לשובע\" להאכיל משפחות"),
+      img("/work/igul-letova/02.webp", "הכסף הקטן שלכם יכול לעזור לארגון \"חסדי לב\" לתת מידע פיננסי למשפחות שרוצות לצאת ממעגל העוני"),
+      img("/work/igul-letova/03.webp", "הכסף הקטן שלכם יכול לעזור לספרייה המרכזית לעיוורים וכבדי ראייה להנגיש עשרות אלפי ספרים"),
+      img("/work/igul-letova/04.webp", "הכסף הקטן שלכם יכול לעזור לעמותת \"אור ירוק\" להציל חיים בכבישים"),
+      img("/work/igul-letova/05.webp", "הכסף הקטן שלכם יכול לעזור לעמותת \"בית קובי\" לתמוך בחיילים בודדים"),
+    ],
   },
   {
     id: "nature-museum-creative",
@@ -155,7 +160,24 @@ export const projects: Project[] = [
     brand: "מוזיאון הטבע",
     category: "creative",
     cover: cv("nature-museum-creative"),
-    images: gallery("nature-museum-creative", 3),
+    images: [
+      img("/work/nature-museum-creative/01.webp", "בעקבות השריפות באמזונס, נכחדו המון מינים שלא היו מוכרים למדע"),
+      img("/work/nature-museum-creative/02.webp", "מודעה ליום כדור הארץ, על דג זהב שמבקש משאלה: לא למות מפלסטיק"),
+      img("/work/nature-museum-creative/03.webp", "מודעה לרגל 160 שנה ליציאת הספר של דרווין שסיפר בין היתר שדאגה לטבע היא דאגה עצמנו"),
+    ],
+  },
+  {
+    id: "tic-tac",
+    title: "טיק טק: מירוץ לילה",
+    brand: "טיק טק",
+    category: "creative",
+    cover: cv("tic-tac"),
+    images: [
+      img(
+        "/work/tic-tac/01.webp",
+        "המודעה הראשונה שעשיתי כקופי היא טיק טק נותנת חסות למירוץ הלילה וזה היה על שילוטים ברחבי תל אביב אז אני הצעיר נעמדתי בתחנות אוטובוס ליד אנשים ואמרתי בטלפון בקול \"כן כן אני פה ליד המודעה שהכנתי, מסתכל עליה, כן אני הכנתי\""
+      ),
+    ],
   },
 
   // ───────────── סושיאל ─────────────

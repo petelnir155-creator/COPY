@@ -19,6 +19,7 @@ export const brands: Brand[] = [
   { name: "אייס ACE", logo: "/logos/ace.webp", mode: "mono" },
   { name: "בנא משקאות", logo: "/logos/bana.webp" },
   { name: "פיאט", logo: "/logos/fiat.webp" },
+  { name: "טיק טק", logo: "/logos/tic-tac.webp" },
   { name: "סימילאק", logo: "/logos/similac.webp" },
   { name: "בזק בינלאומי", logo: "/logos/bezeq-international.svg", mode: "mono" },
   { name: "מרפט", logo: "/logos/marpet.webp" },

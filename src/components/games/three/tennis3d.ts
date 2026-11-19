@@ -340,6 +340,7 @@ export function createTennis3D(host: HTMLElement, cb: { onFail: (e?: unknown) =>
     const kt = serving ? now - t0 : -1;
     resetPose(player);
     resetPose(ump);
+    ump.root.position.y = 1.95; // resetPose מאפס גובה, והשופט יושב על הכיסא
     for (const j of judges) resetPose(j);
 
     // שופט הכיסא: יושב; אחרי הנחיתה מרים יד ומכריז

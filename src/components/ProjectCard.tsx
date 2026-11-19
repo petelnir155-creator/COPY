@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { coverOf } from "../data/projects";
+import { tiktokThumb } from "../lib/tiktokThumb";
 import type { Project } from "../data/projects";
 
 // קאבר טיפוגרפי לקמפיינים בלי תמונה/סרטון: דיו, אדום-כתום או נייר כהה
@@ -17,7 +19,19 @@ export default function ProjectCard({
   index: number;
   onOpen: () => void;
 }) {
-  const cover = coverOf(p);
+  // לסרטוני טיקטוק בלי קאבר ידני מנסים להביא תמונה ממוזערת. אם זה לא מצליח, נשאר הקאבר הטיפוגרפי
+  const firstVideo = p.videos?.[0];
+  const ttUrl = !p.cover && firstVideo?.provider === "tiktok" ? firstVideo.url : null;
+  const [ttThumb, setTtThumb] = useState<string | null>(null);
+  useEffect(() => {
+    if (!ttUrl) return;
+    let live = true;
+    tiktokThumb(ttUrl).then((u) => live && setTtThumb(u));
+    return () => {
+      live = false;
+    };
+  }, [ttUrl]);
+  const cover = coverOf(p) ?? ttThumb;
   const videoCount = p.videos?.length ?? 0;
   const imageCount = p.images?.length ?? 0;
 
@@ -30,11 +44,12 @@ export default function ProjectCard({
             alt=""
             loading="lazy"
             decoding="async"
+            referrerPolicy="no-referrer"
             className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           />
         ) : (
           <div
-            className={`flex h-full w-full flex-col justify-between p-5 transition-transform duration-500 ease-out group-hover:scale-[1.03] ${
+            className={`flex h-full w-full flex-col justify-between p-5 pb-16 transition-transform duration-500 ease-out group-hover:scale-[1.03] ${
               typeStyles[index % typeStyles.length]
             }`}
           >

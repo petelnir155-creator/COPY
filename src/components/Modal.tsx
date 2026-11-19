@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { thumbOf } from "../data/projects";
+import { tiktokThumb } from "../lib/tiktokThumb";
 import type { Project, Video } from "../data/projects";
 
 
@@ -15,6 +16,16 @@ function Player({
   onStart: () => void;
 }) {
   const [on, setOn] = useState(autoplay);
+  const [ttThumb, setTtThumb] = useState<string | null>(null);
+  const ttUrl = video.provider === "tiktok" ? video.url : null;
+  useEffect(() => {
+    if (!ttUrl) return;
+    let live = true;
+    tiktokThumb(ttUrl).then((u) => live && setTtThumb(u));
+    return () => {
+      live = false;
+    };
+  }, [ttUrl]);
 
   useEffect(() => {
     if (on) window.dispatchEvent(new Event("site:video-start"));
@@ -57,7 +68,17 @@ function Player({
             aria-label={`נגנו: ${video.label ?? "סרטון טיקטוק"}`}
             className="group relative flex aspect-[9/16] max-h-[60dvh] w-full items-center justify-center bg-ink"
           >
-            <span className="absolute inset-x-0 top-5 text-center font-sans text-sm text-paper/60">TikTok</span>
+            {ttThumb && (
+              <img
+                src={ttThumb}
+                alt=""
+                referrerPolicy="no-referrer"
+                className="absolute inset-0 h-full w-full object-cover opacity-90"
+              />
+            )}
+            {!ttThumb && (
+              <span className="absolute inset-x-0 top-5 text-center font-sans text-sm text-paper/60">TikTok</span>
+            )}
             <span className="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-xl text-ink transition-transform duration-300 group-hover:scale-110 group-active:scale-95">
               <span aria-hidden className="ms-[-3px]">▶</span>
             </span>

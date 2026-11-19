@@ -65,30 +65,66 @@ export default function Hero() {
 
                 {/* החץ שייך ל"אבא של דין", אז הוא זז איתו כשהסדר מתחלף ומצויר מחדש */}
                 {roleIdx === site.deanRoleIndex && photoOk && (
-                  <svg
+                  <span
                     key={pos}
                     aria-hidden
-                    className="hidden h-8 max-w-sm flex-1 self-center text-ink md:block"
-                    viewBox="0 0 200 40"
-                    preserveAspectRatio="none"
+                    className="hidden flex-1 items-center self-center text-ink md:flex"
+                  >
+                    <svg
+                      className="h-10 min-w-[5rem] flex-1"
+                      viewBox="0 0 200 40"
+                      preserveAspectRatio="none"
+                      fill="none"
+                    >
+                      <motion.path
+                        d="M200 22 C 140 4, 70 40, 0 20"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        vectorEffect="non-scaling-stroke"
+                        initial={reduce ? undefined : ({ pathLength: 0 } as never)}
+                        animate={{ pathLength: 1 } as never}
+                        transition={{ duration: 0.7, delay: 0.35, ease }}
+                      />
+                    </svg>
+                    <svg className="-ms-px h-10 w-6 flex-none" viewBox="0 0 24 40" fill="none">
+                      <motion.path
+                        d="M20 6 L3 20 L20 34"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        initial={reduce ? undefined : ({ pathLength: 0 } as never)}
+                        animate={{ pathLength: 1 } as never}
+                        transition={{ duration: 0.3, delay: 1.0, ease }}
+                      />
+                    </svg>
+                  </span>
+                )}
+
+                {/* במובייל התמונה מתחת לרשימה, אז החץ מתעקל כלפי מטה אליה */}
+                {roleIdx === site.deanRoleIndex && photoOk && (
+                  <svg
+                    key={`m${pos}`}
+                    aria-hidden
+                    className="h-14 w-14 flex-none self-end text-ink md:hidden"
+                    viewBox="0 0 60 60"
                     fill="none"
                   >
                     <motion.path
-                      d="M196 24 C 150 6, 90 40, 14 20"
+                      d="M8 6 C 4 30, 20 44, 44 50"
                       stroke="currentColor"
                       strokeWidth="2.5"
                       strokeLinecap="round"
-                      vectorEffect="non-scaling-stroke"
                       initial={reduce ? undefined : ({ pathLength: 0 } as never)}
                       animate={{ pathLength: 1 } as never}
                       transition={{ duration: 0.7, delay: 0.35, ease }}
                     />
                     <motion.path
-                      d="M14 20 L 32 8 M14 20 L 30 34"
+                      d="M44 50 L 30 52 M44 50 L 38 38"
                       stroke="currentColor"
                       strokeWidth="2.5"
                       strokeLinecap="round"
-                      vectorEffect="non-scaling-stroke"
                       initial={reduce ? undefined : ({ pathLength: 0 } as never)}
                       animate={{ pathLength: 1 } as never}
                       transition={{ duration: 0.3, delay: 0.95, ease }}

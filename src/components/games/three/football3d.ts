@@ -304,6 +304,7 @@ export function createFootball3D(
     const draw = () => {
       g.save();
       g.font = "900 175px Heebo, Arial, sans-serif";
+      g.direction = "rtl";
       g.textAlign = "center";
       g.textBaseline = "middle";
       g.lineJoin = "round";

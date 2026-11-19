@@ -103,7 +103,7 @@ export function createTennis3D(host: HTMLElement, cb: { onFail: (e?: unknown) =>
     g.fillRect(0, 0, 8, 256);
     return tex(c);
   })();
-  const stage = createStage(host, cb, { fov: 40, cam: [0.9, 2.4, 15.6], look: [0, 1.25, -1.5], bg: sky, fog: [0xc9d9e2, 0.0105], exposure: 1.0 });
+  const stage = createStage(host, cb, { fov: 44, cam: [-0.3, 2.6, 17.6], look: [0, 1.2, -1.5], bg: sky, fog: [0xc9d9e2, 0.0105], exposure: 1.0 });
   const { scene, camera, mobile } = stage;
   const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 
@@ -217,10 +217,10 @@ export function createTennis3D(host: HTMLElement, cb: { onFail: (e?: unknown) =>
   const backR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, 0.8), gm);
   backR.position.set(0.44, 2.3, 0);
   chair.add(backR);
-  chair.position.set(7.6, 0, 0);
+  chair.position.set(7.3, 0, 0);
   scene.add(chair);
   const ump = makePlayer({ jersey: "#f4efe6", shorts: "#2a2d35", sock: "#f4efe6", hair: "#d8d2c6", skin: "#E6C3A3", face: false });
-  ump.root.position.set(7.55, 1.95, 0);
+  ump.root.position.set(7.25, 1.95, 0);
   ump.root.rotation.y = Math.PI / 2;
   ump.root.scale.setScalar(0.95);
   scene.add(ump.root);
@@ -234,7 +234,7 @@ export function createTennis3D(host: HTMLElement, cb: { onFail: (e?: unknown) =>
 
   // ----- שחקן -----
   const player = makePlayer({ jersey: "#F4EFE6", shorts: "#F4EFE6", sock: "#F4EFE6", hair: "#1a1411", skin: "#E6C3A3" });
-  const P0 = V(-1.3, 0, 8.8);
+  const P0 = V(-2.2, 0, 12.5);
   player.root.position.copy(P0);
   scene.add(player.root);
   // מחבט בידית שמאל
@@ -333,7 +333,7 @@ export function createTennis3D(host: HTMLElement, cb: { onFail: (e?: unknown) =>
   const lookBase = stage.LOOK.clone();
   let lastFlash = 0;
 
-  const umpScreen = stage.project(7.55, 3.2, 0);
+  const umpScreen = stage.project(7.25, 3.2, 0);
   cb.onReady({ ump: umpScreen, player: stage.project(P0.x, 1.0, P0.z) });
 
   stage.start((now) => {

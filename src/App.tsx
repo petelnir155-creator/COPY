@@ -11,10 +11,12 @@ import ElevatorMusic from "./components/ElevatorMusic";
 import NewsPage from "./components/NewsPage";
 import CvPage from "./components/CvPage";
 import GamesPage from "./components/GamesPage";
+import A11yPage from "./components/A11yPage";
 
 const NEWS_HASH = "#/news";
 const CV_HASH = "#/cv";
 const GAMES_HASH = "#/games";
+const A11Y_HASH = "#/a11y";
 
 export default function App() {
   const [open, setOpen] = useState<Project | null>(null);
@@ -22,7 +24,8 @@ export default function App() {
   const isNews = hash === NEWS_HASH;
   const isCv = hash === CV_HASH;
   const isGames = hash === GAMES_HASH;
-  const isMain = !isNews && !isCv && !isGames;
+  const isA11y = hash === A11Y_HASH;
+  const isMain = !isNews && !isCv && !isGames && !isA11y;
 
   useEffect(() => {
     const onHash = () => setHash(window.location.hash);
@@ -61,6 +64,8 @@ export default function App() {
         <CvPage />
       ) : isGames ? (
         <GamesPage />
+      ) : isA11y ? (
+        <A11yPage />
       ) : (
         <>
           <a

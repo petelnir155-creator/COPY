@@ -343,6 +343,7 @@ export function createFootball3D(
       g.lineWidth = 10;
       g.strokeRect(14, 14, w - 28, h - 28);
       g.fillStyle = fg;
+      g.direction = "rtl"; // בלי זה סימני הפיסוק בסוף המשפט (!!!) נוחתים בצד הלא נכון בעברית
       g.textAlign = "center";
       g.textBaseline = "middle";
       g.font = `900 ${size}px Heebo, Arial, sans-serif`;

@@ -33,6 +33,8 @@ export type Project = {
   images?: Img[];
   parts?: string[];
   cover?: string;
+  // צבעי המותג לקאבר הטיפוגרפי (כשאין תמונה): { bg: "#...", fg: "#..." }
+  coverColors?: { bg: string; fg: string };
 };
 
 const yt = (id: string, label?: string): Video => ({ provider: "youtube", id, label });
@@ -214,6 +216,7 @@ export const projects: Project[] = [
   {
     id: "durex-tiktok",
     title: "דורקס בטיקטוק",
+    coverColors: { bg: "#2468D8", fg: "#FFFFFF" },
     brand: "דורקס",
     category: "social",
     videos: [
@@ -225,7 +228,8 @@ export const projects: Project[] = [
   },
   {
     id: "pelephone-tiktok",
-    title: "חנן בן ארי ואוראל צברי",
+    title: "פלאפון בטיקטוק",
+    coverColors: { bg: "#0070B8", fg: "#FFFFFF" },
     brand: "פלאפון",
     category: "social",
     videos: [

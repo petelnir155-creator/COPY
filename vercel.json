@@ -1,0 +1,7 @@
+{
+  "redirects": [
+    { "source": "/creative", "destination": "/#work", "permanent": true },
+    { "source": "/social", "destination": "/#work", "permanent": true },
+    { "source": "/shut-up-and-take-my-money", "destination": "/#contact", "permanent": true }
+  ]
+}

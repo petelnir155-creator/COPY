@@ -65,10 +65,13 @@ export default function Hero() {
 
                 {/* החץ שייך ל"אבא של דין", אז הוא זז איתו כשהסדר מתחלף ומצויר מחדש */}
                 {roleIdx === site.deanRoleIndex && photoOk && (
-                  <span
+                  <motion.span
                     key={pos}
                     aria-hidden
                     className="hidden flex-1 items-center self-center text-ink md:flex"
+                    initial={reduce ? undefined : { clipPath: "inset(-10% 0% -10% 100%)" }}
+                    animate={{ clipPath: "inset(-10% 0% -10% 0%)" }}
+                    transition={{ duration: 0.9, delay: 0.35, ease }}
                   >
                     <svg
                       className="h-10 min-w-[5rem] flex-1"
@@ -76,30 +79,24 @@ export default function Hero() {
                       preserveAspectRatio="none"
                       fill="none"
                     >
-                      <motion.path
+                      <path
                         d="M200 22 C 140 4, 70 40, 0 20"
                         stroke="currentColor"
                         strokeWidth="2.5"
                         strokeLinecap="round"
                         vectorEffect="non-scaling-stroke"
-                        initial={reduce ? undefined : ({ pathLength: 0 } as never)}
-                        animate={{ pathLength: 1 } as never}
-                        transition={{ duration: 0.7, delay: 0.35, ease }}
                       />
                     </svg>
                     <svg className="-ms-px h-10 w-6 flex-none" viewBox="0 0 24 40" fill="none">
-                      <motion.path
+                      <path
                         d="M20 6 L3 20 L20 34"
                         stroke="currentColor"
                         strokeWidth="2.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        initial={reduce ? undefined : ({ pathLength: 0 } as never)}
-                        animate={{ pathLength: 1 } as never}
-                        transition={{ duration: 0.3, delay: 1.0, ease }}
                       />
                     </svg>
-                  </span>
+                  </motion.span>
                 )}
 
                 {/* במובייל התמונה מתחת לרשימה, אז החץ מתעקל כלפי מטה אליה */}
@@ -187,26 +184,25 @@ export default function Hero() {
           {site.jingleKicker}{" "}
           <span className="relative inline-block">
             <span className="relative z-10">{site.jingleKickerHighlight}</span>
-            <svg
+            <motion.svg
               aria-hidden
               className="absolute inset-x-0 -bottom-2 h-3 w-full text-accent"
+              initial={{ clipPath: "inset(-20% 0% -20% 100%)" }}
+              whileInView={{ clipPath: "inset(-20% 0% -20% 0%)" }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.9, delay: 0.6, ease }}
               viewBox="0 0 300 12"
               preserveAspectRatio="none"
               fill="none"
             >
-              <motion.path
+              <path
                 d="M2 8 C 60 2, 120 11, 180 5 S 270 6, 298 4"
                 stroke="currentColor"
                 strokeWidth="3"
                 strokeLinecap="round"
                 vectorEffect="non-scaling-stroke"
-                // cast: טיפוסי framer-motion מתנגשים עם pathLength של SVG
-                initial={{ pathLength: 0 } as never}
-                whileInView={{ pathLength: 1 } as never}
-                viewport={{ once: true }}
-                transition={{ duration: 0.9, delay: 0.6, ease }}
               />
-            </svg>
+            </motion.svg>
           </span>
         </motion.p>
       </div>

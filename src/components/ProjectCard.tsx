@@ -50,8 +50,9 @@ export default function ProjectCard({
         ) : (
           <div
             className={`flex h-full w-full flex-col justify-between p-5 pb-16 transition-transform duration-500 ease-out group-hover:scale-[1.03] ${
-              typeStyles[index % typeStyles.length]
+              p.coverColors ? "" : typeStyles[index % typeStyles.length]
             }`}
+            style={p.coverColors ? { backgroundColor: p.coverColors.bg, color: p.coverColors.fg } : undefined}
           >
             <span className="font-sans text-sm opacity-70">{p.brand ?? " "}</span>
             <span className="font-serif text-3xl font-black leading-[1.05] sm:text-4xl">{p.title}</span>

@@ -1,5 +1,5 @@
 // רצועת המותגים (Marquee). הלוגואים של הלקוחות. הסדר כאן הוא הסדר ברצועה.
-// הקבצים ב-public/logos/ נחתכו מצילומי מסך (איכות בינונית). כדי לשדרג: להחליף את הקובץ
+// הלוגואים הוחלפו לגרסאות איכותיות. אם יש לוגו שעדיין מטושטש (דורקס, פיאט), להחליף את הקובץ באותו שם.
 // באותו שם (עדיף SVG או PNG גדול), או לעדכן כאן את הנתיב.
 
 // mode: "gray" = אפור ברירת מחדל (ללוגו עם פרטים פנימיים), "mono" = צללית בצבע הדיו (ללוגו שטוח בצבע אחד).
@@ -15,15 +15,15 @@ export const brands: Brand[] = [
   { name: "ווינר", logo: "/logos/winner.webp", scale: 0.9 },
   { name: "דורקס", logo: "/logos/durex.png" },
   { name: "הוט סינמה", logo: "/logos/hot-cinema.webp" },
-  { name: "וניש", logo: "/logos/vanish.png" },
+  { name: "וניש", logo: "/logos/vanish.webp" },
   { name: "אייס ACE", logo: "/logos/ace.webp", mode: "mono" },
   { name: "פיאט", logo: "/logos/fiat.png" },
   { name: "סימילאק", logo: "/logos/similac.webp" },
   { name: "בזק בינלאומי", logo: "/logos/bezeq-international.svg", mode: "mono" },
   { name: "מוזיאון הטבע", logo: "/logos/museum.webp" },
-  { name: "LG", logo: "/logos/lg.png" },
+  { name: "LG", logo: "/logos/lg.webp" },
   { name: "שופרסל טרוול", logo: "/logos/shufersal-travel.webp" },
-  { name: "פלאפון", logo: "/logos/pelephone.png" },
+  { name: "פלאפון", logo: "/logos/pelephone.webp" },
   { name: "פורינה", logo: "/logos/purina.webp" },
   { name: "איירוויק", logo: "/logos/airwick.webp" },
   { name: "יאנגו דלי", logo: "/logos/yango-deli.webp", mode: "mono" },

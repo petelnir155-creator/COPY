@@ -18,7 +18,7 @@ export default function Marquee() {
         id="brands-title"
         className="mx-auto mb-8 max-w-6xl px-5 font-serif text-2xl font-bold sm:px-8 sm:text-3xl"
       >
-        חלק מהמותגים שהסכימו לעבוד איתי
+        יצא לי לכתוב לכל מיני מותגים, למשל:
       </h2>
 
       {/* העטיפה ב-ltr קריטית: בדף RTL מסלול רחב נצמד לצד ימין, והאנימציה שמזיזה שמאלה חושפת רווח ריק */}

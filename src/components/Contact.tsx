@@ -117,6 +117,10 @@ export default function Contact() {
 
         <p className="mt-10 text-sm text-paper/50">
           © {new Date().getFullYear()} {site.name}
+          {" · "}
+          <a href="#/a11y" className="underline underline-offset-4 hover:text-paper">
+            הצהרת נגישות
+          </a>
         </p>
       </div>
     </section>

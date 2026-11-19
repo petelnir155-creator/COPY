@@ -7,9 +7,9 @@ import type { Category } from "../data/projects";
 const links = [
   { href: "#work", label: "עבודות" },
   { href: "#brands", label: "מותגים" },
+  { href: "#contact", label: "דברו איתי" },
   { href: "#/cv", label: "קורות חיים" },
   { href: "#/games", label: "משחקונים" },
-  { href: "#contact", label: "דברו איתי" },
 ];
 
 export default function Nav() {

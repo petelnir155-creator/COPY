@@ -73,7 +73,7 @@ export default function Contact() {
             href={site.whatsapp}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-accent px-7 py-4 text-lg font-bold text-ink transition hover:bg-paper active:scale-[0.98]"
+            className="inline-flex items-center gap-2 bg-[#25D366] px-7 py-4 text-lg font-bold text-ink transition hover:bg-paper active:scale-[0.98]"
           >
             וואטסאפ
             <span aria-hidden>↗</span>

@@ -36,6 +36,45 @@ function Player({
     );
   }
 
+  if (video.provider === "tiktok") {
+    return (
+      <div className="mx-auto w-full max-w-[340px]">
+        {on ? (
+          <iframe
+            title={video.label ?? "סרטון טיקטוק"}
+            src={`https://www.tiktok.com/embed/v2/${video.id}`}
+            allow="autoplay; encrypted-media; fullscreen"
+            allowFullScreen
+            className="h-[740px] max-h-[72dvh] w-full border-0 bg-ink"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setOn(true);
+              onStart();
+            }}
+            aria-label={`נגנו: ${video.label ?? "סרטון טיקטוק"}`}
+            className="group relative flex aspect-[9/16] max-h-[60dvh] w-full items-center justify-center bg-ink"
+          >
+            <span className="absolute inset-x-0 top-5 text-center font-sans text-sm text-paper/60">TikTok</span>
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-xl text-ink transition-transform duration-300 group-hover:scale-110 group-active:scale-95">
+              <span aria-hidden className="ms-[-3px]">▶</span>
+            </span>
+          </button>
+        )}
+        <a
+          href={video.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="link-draw mt-3 inline-block pb-0.5 text-sm font-medium"
+        >
+          לפתיחה בטיקטוק ↗
+        </a>
+      </div>
+    );
+  }
+
   if (video.provider === "link") {
     return (
       <div className="flex aspect-video w-full items-center justify-center bg-ink">

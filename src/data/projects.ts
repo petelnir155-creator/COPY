@@ -211,8 +211,12 @@ export const projects: Project[] = [
     title: "חנן בן ארי ואוראל צברי",
     brand: "פלאפון",
     category: "social",
-    // TODO: לינק לטיקטוק
-    videos: [],
+    videos: [
+      tt("https://www.tiktok.com/@oreltsabari/video/6864118960854469894"),
+      tt("https://www.tiktok.com/@pelephone.il/video/7062237353531788545"),
+      tt("https://www.tiktok.com/@pelephone.il/video/7061519375102250241"),
+      tt("https://www.tiktok.com/@pelephone.il/video/7077449212979399937"),
+    ],
   },
   {
     id: "durex-posts",

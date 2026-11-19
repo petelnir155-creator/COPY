@@ -19,6 +19,7 @@ export default function ProjectCard({
 }) {
   const cover = coverOf(p);
   const videoCount = p.videos?.length ?? 0;
+  const imageCount = p.images?.length ?? 0;
 
   return (
     <button type="button" onClick={onOpen} className="group block w-full text-start">
@@ -40,6 +41,12 @@ export default function ProjectCard({
             <span className="font-sans text-sm opacity-70">{p.brand ?? " "}</span>
             <span className="font-serif text-3xl font-black leading-[1.05] sm:text-4xl">{p.title}</span>
           </div>
+        )}
+
+        {videoCount === 0 && imageCount > 1 && (
+          <span className="absolute bottom-3 start-3 bg-ink px-3 py-1.5 text-xs font-medium text-paper transition-colors group-hover:bg-accent group-hover:text-ink">
+            {imageCount} {p.category === "social" ? "פוסטים" : "מודעות"}
+          </span>
         )}
 
         {videoCount > 0 && (

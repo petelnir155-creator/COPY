@@ -8,6 +8,7 @@
 //   category  "creative" | "social"
 //   blurb     (אופציונלי) משפט-שניים
 //   videos    (אופציונלי) רשימת סרטונים: yt("ID", "תווית") / vimeo("ID", "תווית") / link("URL", "תווית")
+//   images    (אופציונלי) גלריה: img("/work/<id>/01.webp", "הסבר קצר מתחת לתמונה") . התמונה הראשונה היא גם הקאבר אם אין cover
 //   parts     (אופציונלי) רשימת חלקים לקמפיינים בלי סרטון (פוסטים, מודעות)
 //   cover     (אופציונלי) נתיב תמונת קאבר מתוך public/covers/ . בלי זה: מהסרטון הראשון, ואם אין, קאבר טיפוגרפי
 // ============================================================
@@ -16,7 +17,10 @@ export type Category = "creative" | "social";
 
 export type Video =
   | { provider: "youtube" | "vimeo"; id: string; label?: string }
-  | { provider: "link"; url: string; label?: string };
+  | { provider: "link"; url: string; label?: string }
+  | { provider: "file"; src: string; poster?: string; label?: string };
+
+export type Img = { src: string; caption?: string };
 
 export type Project = {
   id: string;
@@ -25,6 +29,7 @@ export type Project = {
   category: Category;
   blurb?: string;
   videos?: Video[];
+  images?: Img[];
   parts?: string[];
   cover?: string;
 };
@@ -33,6 +38,12 @@ const yt = (id: string, label?: string): Video => ({ provider: "youtube", id, la
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const vimeo = (id: string, label?: string): Video => ({ provider: "vimeo", id, label });
 const link = (url: string, label?: string): Video => ({ provider: "link", url, label });
+const file = (src: string, poster?: string, label?: string): Video => ({ provider: "file", src, poster, label });
+// מספר תמונות ממוספרות בתיקייה: gallery("vanish-posts", 6) => 01.webp ... 06.webp
+const img = (src: string, caption?: string): Img => ({ src, caption });
+const gallery = (id: string, n: number): Img[] =>
+  Array.from({ length: n }, (_, i) => img(`/work/${id}/${String(i + 1).padStart(2, "0")}.webp`));
+const cv = (id: string) => `/work/${id}/cover.webp`;
 void vimeo; // זמין לשימוש עתידי
 
 export const categories: { key: Category; label: string }[] = [
@@ -121,24 +132,30 @@ export const projects: Project[] = [
   },
   {
     id: "winner",
-    title: "ווינר",
+    title: "ווינר חסות",
     brand: "ווינר",
     category: "creative",
-    parts: ["נתוני הקמפיין יעלו בקרוב (בוויקס: סרטוני 6 ו-14 שניות, כמה גרסאות)"],
-    // TODO: סרטונים או תמונות
+    videos: [
+      yt("teFP0ErBpns", "חסות 1"),
+      yt("nSr1IVGrl_U", "חסות 2"),
+      yt("qMlcenQAOS4", "חסות 3"),
+    ],
   },
   {
     id: "igul-letova",
     title: "עיגול לטובה",
     category: "creative",
-    parts: ["הספרייה לעיוורים", "חסדי לב", "לשובע", "אור ירוק"],
+    cover: cv("igul-letova"),
+    // TODO: להוסיף הסבר קצר לכל מודעה: img("/work/igul-letova/01.webp", "ההסבר")
+    images: gallery("igul-letova", 5),
   },
   {
     id: "nature-museum-creative",
     title: "מוזיאון הטבע",
     brand: "מוזיאון הטבע",
     category: "creative",
-    parts: ["אמזונס", "יום כדור הארץ", "דרווין"],
+    cover: cv("nature-museum-creative"),
+    images: gallery("nature-museum-creative", 3),
   },
 
   // ───────────── סושיאל ─────────────
@@ -168,8 +185,10 @@ export const projects: Project[] = [
     title: "מוזיאון הטבע בבית",
     brand: "מוזיאון הטבע",
     category: "social",
+    cover: cv("nature-museum-home"),
     blurb:
-      "בסגר הראשון של הקורונה, רצינו למצוא דרך לתת לאנשים את הסיור במוזיאון - גם מהבית. צילומים מלאים של המוזיאון ועמוד אינסטגרם באווירת סיור.",
+      "בסגר הראשון של הקורונה, רצינו לתת לאנשים סיור במוזיאון - גם מהבית. אז עשינו הפקת צילומים לכל המוזיאון, ויצרנו עמוד אינסטגרם באווירת סיור, עם מידע על כל פרט ומעבר בין כל קטגוריה במוזיאון.",
+    videos: [file("/work/nature-museum-home/tour.mp4", "/work/nature-museum-home/poster.webp", "הסיור")],
   },
   {
     id: "durex-tiktok",
@@ -193,28 +212,77 @@ export const projects: Project[] = [
     title: "וניש: פוסטים",
     brand: "וניש",
     category: "social",
-    parts: [
-      "אירוויזיון",
-      "יום העצמאות",
-      "חיפה נגד פסז'",
-      "שעון קיץ",
-      "חולצה לבנה",
-      "חזרה לגן",
-      "אולימפיאדה",
-      "ט\"ו באב",
-      "שעון חורף",
-    ],
+    cover: cv("vanish-posts"),
+    images: gallery("vanish-posts", 6),
   },
   {
     id: "nature-museum-posts",
     title: "מוזיאון הטבע: פוסטים",
     brand: "מוזיאון הטבע",
     category: "social",
-    parts: ["פרה", "חודש הקניות", "ט\"ו באב", "יום כדור הארץ", "גיוון", "סוכות"],
+    cover: cv("nature-museum-posts"),
+    images: gallery("nature-museum-posts", 5),
+  },
+  {
+    id: "shufersal-travel",
+    title: "שופרסל טרוול: פוסטים",
+    brand: "שופרסל טרוול",
+    category: "social",
+    cover: cv("shufersal-travel"),
+    images: gallery("shufersal-travel", 6),
+  },
+  {
+    id: "bezeq-international",
+    title: "בזק בינלאומי: פוסטים",
+    brand: "בזק בינלאומי",
+    category: "social",
+    cover: cv("bezeq-international"),
+    images: gallery("bezeq-international", 8),
+  },
+  {
+    id: "pelephone-posts",
+    title: "פלאפון: פוסטים",
+    brand: "פלאפון",
+    category: "social",
+    cover: cv("pelephone-posts"),
+    images: gallery("pelephone-posts", 11),
+  },
+  {
+    id: "durex-posts",
+    title: "דורקס: פוסטים",
+    brand: "דורקס",
+    category: "social",
+    cover: cv("durex-posts"),
+    images: gallery("durex-posts", 10),
+  },
+  {
+    id: "fiat-posts",
+    title: "פיאט: פוסטים",
+    brand: "פיאט",
+    category: "social",
+    cover: cv("fiat"),
+    images: gallery("fiat", 7),
+  },
+  {
+    id: "mahsanei-hashmal-posts",
+    title: "מחסני חשמל: פוסטים",
+    brand: "מחסני חשמל",
+    category: "social",
+    cover: cv("mahsanei-hashmal"),
+    images: gallery("mahsanei-hashmal", 7),
+  },
+  {
+    id: "eldan-post",
+    title: "אלדן: פוסט",
+    brand: "אלדן",
+    category: "social",
+    cover: cv("eldan"),
+    images: gallery("eldan", 1),
   },
 ];
 
-void link; // זמין לטיקטוקים ולינקים חיצוניים
+void link;
+void img; // זמין לטיקטוקים ולינקים חיצוניים
 
 // ---- עזרים ----
 

@@ -262,6 +262,9 @@ export default function Modal({ project: p, onClose }: { project: Project; onClo
   const [started, setStarted] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
 
+  // כשהחלון נסגר, מוזיקת המעלית יכולה לחזור (אם הייתה מנגנת לפני הסרטון)
+  useEffect(() => () => void window.dispatchEvent(new Event("site:video-end")), []);
+
   useEffect(() => {
     const prevFocus = document.activeElement as HTMLElement | null;
     const prevOverflow = document.body.style.overflow;

@@ -209,7 +209,7 @@ function Gallery({ images, title }: { images: { src: string; caption?: string }[
               type="button"
               onClick={() => go(1)}
               aria-label="הבא"
-              className="absolute start-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center border-2 border-ink bg-paper text-lg transition hover:bg-ink hover:text-paper active:scale-95"
+              className="absolute end-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center border-2 border-ink bg-paper text-lg transition hover:bg-ink hover:text-paper active:scale-95"
             >
               ←
             </button>
@@ -217,7 +217,7 @@ function Gallery({ images, title }: { images: { src: string; caption?: string }[
               type="button"
               onClick={() => go(-1)}
               aria-label="הקודם"
-              className="absolute end-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center border-2 border-ink bg-paper text-lg transition hover:bg-ink hover:text-paper active:scale-95"
+              className="absolute start-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center border-2 border-ink bg-paper text-lg transition hover:bg-ink hover:text-paper active:scale-95"
             >
               →
             </button>
@@ -228,7 +228,7 @@ function Gallery({ images, title }: { images: { src: string; caption?: string }[
       <div className="mt-3 flex items-start justify-between gap-4">
         <p className="min-h-[1.5rem] max-w-2xl text-lg leading-relaxed">{cur.caption}</p>
         {n > 1 && (
-          <span className="shrink-0 font-sans text-sm tabular-nums text-ink/60" aria-live="polite">
+          <span dir="ltr" className="shrink-0 font-sans text-sm tabular-nums text-ink/60" aria-live="polite">
             {i + 1} / {n}
           </span>
         )}

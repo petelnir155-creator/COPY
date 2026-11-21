@@ -20,7 +20,7 @@ export const site = {
   jingleKicker: "אבל כאילו,",
   jingleKickerHighlight: "עוד לא מאוחר להביא לי המון כסף",
 
-  whatsapp: "https://bit.ly/NirpetelWhatsapp",
+  whatsapp: "https://wa.me/972545887914",
   // TODO: להעלות את הקובץ ל-public/ בשם הזה (או לעדכן כאן את הנתיב)
   cv: "/nir-petel-cv.pdf",
 
